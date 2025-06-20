@@ -1,0 +1,30 @@
+# Bỏ qua thư mục build của .NET
+bin/
+obj/
+
+# Bỏ qua thư mục Visual Studio
+.vs/
+
+# Bỏ qua thư mục cấu hình VS Code
+.vscode/
+
+# Node.js modules
+node_modules/
+
+# Thư mục publish
+publish/
+
+# File log, tạm
+*.log
+*.tmp
+
+# File cấu hình người dùng
+*.user
+*.suo
+
+# Mac OS
+.DS_Store
+
+# Windows thumbnail/cache
+Thumbs.db
+ehthumbs.db
