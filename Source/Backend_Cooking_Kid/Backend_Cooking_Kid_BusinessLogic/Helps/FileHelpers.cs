@@ -12,6 +12,11 @@ namespace Backend_Cooking_Kid_BusinessLogic.Helps
 {
 	public class FileHelpers
 	{
+		/// <summary>
+		/// Hàm đọc csv sang data table 
+		/// </summary>
+		/// <param name="file"></param>
+		/// <returns></returns>
 		public static DataTable ReadCsvToDataTable(IFormFile file)
 		{
 			var table = new DataTable();
@@ -52,6 +57,11 @@ namespace Backend_Cooking_Kid_BusinessLogic.Helps
 			return table;
 		}
 
+		/// <summary>
+		/// Hàm đọc excel sang data table 
+		/// </summary>
+		/// <param name="file"></param>
+		/// <returns></returns>
 		public static DataTable ReadXlsxToDataTable(IFormFile file)
 		{
 			using var stream = file.OpenReadStream();
@@ -66,6 +76,12 @@ namespace Backend_Cooking_Kid_BusinessLogic.Helps
 			return dataSet.Tables[0];
 		}
 
+
+		/// <summary>
+		/// Hàm convert từ dictionary sang data table 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns></returns>
 		public static DataTable ConvertToDataTable(List<Dictionary<string , object>> data)
 		{
 			var dt = new DataTable();

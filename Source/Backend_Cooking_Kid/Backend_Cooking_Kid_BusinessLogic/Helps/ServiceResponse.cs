@@ -1,7 +1,7 @@
 ﻿namespace Backend_Cooking_Kid_BusinessLogic.Helps
 {
 	/// <summary>
-	/// Class định nghĩa response
+	/// Class defination response
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class ServiceResponse<T>

@@ -7,22 +7,21 @@ using System.Data;
 
 namespace Backend_Cooking_Kid_DataAccess.Repositories
 {
-	#region Interface
 	public interface IBaseRepository<T> where T : class
 	{
 		//Base
 		Task<List<dynamic>> GetAllAsync(string tableName , int? page , int? pageSize);
-
+		Task<dynamic?> GetByIdAsync(object id , string tableName , string? keyName = null);
 		Task<int> UpsertAsync(DataTable table , JsonDefination sqlJsonDefination);
-		
-		//get Template
-		Task<JsonDefination> GetTemplateByTableNameAsync(string tableName);
-		Task<List<JsonDefination>> GetAllTemplateDefinitionsAsync();
-		//Task<MetadataResponse> GetTemplateMetadataByTableNameAsync(string tableName);
+
 		//External
-		(DataTable, List<string>?) CheckExcelColumnMapping(DataTable oldDataTable , JsonDefination.ExcelIntegrationMap excelColumn);
+		DataTable CheckExcelColumnMapping(DataTable oldDataTable , JsonDefination.ExcelIntegrationMap excelColumn);
+
+		//get Template
+		Task<JsonDefination> GetTemplateModelAsync(string tableName);
+		Task<List<JsonDefination>> GetAllTemplateModelAsync();
+		Task<object> GetTemplateMetadataAsync(string tableName);
 	}
-	#endregion
 	public class BaseRepository<T> : IBaseRepository<T> where T : class
 	{
 		private readonly CookingKidContext _context;
@@ -35,6 +34,15 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 			_dbSet = _context.Set<T>();
 		}
 		#region Base
+		/// <summary>
+		/// Get all value of table
+		/// </summary>
+		/// <param name="tableName">table name</param>
+		/// <param name="page">page quantity</param>
+		/// <param name="pageSize">page size</param>
+		/// <returns>All value of table or value of page size</returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="Exception"></exception>
 		public async Task<List<dynamic>> GetAllAsync(string tableName , int? page , int? pageSize)
 		{
 			if ( string.IsNullOrWhiteSpace(tableName) )
@@ -72,6 +80,70 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 				throw new Exception($"Exception when fetching paged data from table '{tableName}'" , ex);
 			}
 		}
+
+		/// <summary>
+		/// Get by id of table
+		/// </summary>
+		/// <param name="id">value primarykey</param>
+		/// <param name="tableName">table name</param>
+		/// <param name="keyName">key name or null</param>
+		/// <returns>List or T object</returns>
+		/// <exception cref="ExceptionFormat"></exception>
+		public async Task<dynamic?> GetByIdAsync(object id , string tableName , string? keyName = null)
+		{
+			if ( id == null )
+				throw new ExceptionFormat("Giá trị khoá chính là null");
+
+			var sqlDef = await GetTemplateModelAsync(tableName);
+			if ( sqlDef == null )
+				throw new ExceptionFormat($"Không tìm thấy định nghĩa bảng {tableName}");
+
+			// Nếu id là Dictionary → dùng multi-key
+			if ( id is IDictionary<string , string> keyDict )
+			{
+				var whereClause = string.Join(" AND " , keyDict.Select(k => $"[{k.Key}] = @{k.Key}"));
+				var sql = $"SELECT * FROM [{tableName}] WHERE {whereClause}";
+				var parameters = new DynamicParameters();
+				foreach ( var kv in keyDict )
+				{
+					parameters.Add(kv.Key , kv.Value);
+				}
+				if ( _dbConnect.State != ConnectionState.Open )
+					_dbConnect.Open();
+				var results = await _dbConnect.QueryAsync<dynamic>(sql , parameters);
+				return results;
+			}
+			else if ( id is string )
+			{
+				// Nếu là single key
+				if ( string.IsNullOrEmpty(keyName) )
+				{
+					keyName = GetPrimaryKeys(sqlDef).FirstOrDefault();
+					if ( string.IsNullOrEmpty(keyName) )
+						throw new ExceptionFormat("Không tìm thấy khóa chính");
+				}
+
+				var sqlSingle = $"SELECT * FROM [{tableName}] WHERE [{keyName}] = @id";
+
+				if ( _dbConnect.State != ConnectionState.Open )
+					_dbConnect.Open();
+				var result = await _dbConnect.QueryAsync<dynamic>(sqlSingle , new { id });
+				return result;
+			}
+			else
+			{
+				throw new ExceptionFormat("Dữ liệu id truyền vào không hợp lệ");
+			}
+		}
+
+		/// <summary>
+		/// Update or insert data to db
+		/// </summary>
+		/// <param name="table">value of datatable</param>
+		/// <param name="sqlJsonDefination">value of jsonDefination</param>
+		/// <returns>number row if success or list errors</returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="ExceptionFormat"></exception>
 		public async Task<int> UpsertAsync(DataTable table , JsonDefination sqlJsonDefination)
 		{
 			if ( sqlJsonDefination == null ) throw new ArgumentNullException(nameof(sqlJsonDefination));
@@ -126,7 +198,8 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 									var value = await reader.IsDBNullAsync(i) ? null : reader.GetValue(i);
 									row[reader.GetName(i)] = value!;
 								}
-								validationResults.Add(row);
+								if ( row != null )
+									validationResults.Add(row!);
 							}
 						}
 						var errors = validationResults
@@ -153,7 +226,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 						{
 							transaction.Rollback();
 							isRollbacked = true;
-							throw new ValidateFortmat.ValidationException("Validation failed" , allErrors);
+							throw new ExceptionFormat("Invalid values: \n" , allErrors);
 						}
 						//merge dữ liệu từ tempTable sang database
 						var mergeSql = GenerateMergeSqlFromTempTable(tempTableName , sqlJsonDefination);
@@ -167,22 +240,92 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 					catch ( Exception ex )
 					{
 						if ( !isRollbacked )
-						{
 							transaction.Rollback();
-						}
 
-						if ( ex is ValidateFortmat.ValidationException valEx )
-						{
-							throw new ValidateFortmat.ValidationException(valEx.Message , valEx.Errors);
-						}
-
-						throw new ValidateFortmat.ValidationException("Error when upsert" , new List<string> { ex.Message });
+						throw ex is ExceptionFormat ? ex : new ExceptionFormat("Error when upsert: " , new List<string> { ex.Message });
 					}
 				}
 			}
 		}
 
 		#endregion
+
+		#region external function
+		/// <summary>
+		/// Hàm kiểm tra col table có map với col trong db hay không 
+		/// </summary>
+		/// <param name="oldDataTable"></param>
+		/// <param name="excelColumn"></param>
+		/// <returns>New Table</returns>
+		public DataTable CheckExcelColumnMapping(DataTable oldDataTable , JsonDefination.ExcelIntegrationMap excelColumn)
+		{
+			var newDataTable = new DataTable();
+			var missingColumns = new List<string>();
+			// Lưu danh sách các tên cột đã map để copy dữ liệu sau
+			var matchedColumns = new List<string>();
+			foreach ( var excelCol in excelColumn.ColumnMapping )
+			{
+				// Kiểm tra xem cột excel này có trong oldDataTable không
+				bool columnExists = oldDataTable.Columns
+					.Cast<DataColumn>()
+					.Any(c => string.Equals(c.ColumnName.Trim() , excelCol.FieldName.Trim() , StringComparison.OrdinalIgnoreCase));
+
+				if ( excelCol.Required && !columnExists )
+				{
+					// Nếu cột required mà không tồn tại thì thêm vào danh sách thiếu
+					missingColumns.Add($"Column {excelCol.FieldName} is required.");
+				}
+				else if ( columnExists )
+				{
+					// Nếu tồn tại thì thêm cột vào newDataTable
+					newDataTable.Columns.Add(excelCol.FieldName); // Dùng tên chuẩn từ mapping
+					matchedColumns.Add(excelCol.FieldName);
+				}
+			}
+			//nếu có lỗi thì trả về lỗi luôn
+			if ( missingColumns.Count > 0 )
+			{
+				throw new ExceptionFormat("Invalid Excel Format" , missingColumns);
+			}
+			// Tạo map field -> required
+			var requiredFields = new Dictionary<string , bool>();
+			foreach ( var col in excelColumn.ColumnMapping )
+			{
+				requiredFields[col.FieldName.Trim()] = col.Required;
+			}
+			// Thêm dữ liệu từ oldDataTable vào newDataTable chỉ với các cột đã match
+			for ( int rowIndex = 0; rowIndex < oldDataTable.Rows.Count; rowIndex++ )
+			{
+				var oldRow = oldDataTable.Rows[rowIndex];
+				var newRow = newDataTable.NewRow();
+
+				foreach ( string col in matchedColumns )
+				{
+					var oldCol = oldDataTable.Columns
+						.Cast<DataColumn>()
+						.FirstOrDefault(c => string.Equals(c.ColumnName.Trim() , col , StringComparison.OrdinalIgnoreCase));
+					if ( oldCol != null )
+					{
+						var value = oldRow[oldCol];
+						newRow[col] = value;
+						// Kiểm tra nếu là cột required và giá trị null hoặc rỗng
+						if ( requiredFields[col]
+							&& (value == null || value == DBNull.Value || string.IsNullOrWhiteSpace(value.ToString())) )
+						{
+							missingColumns.Add($"Missing value in column '{col}' at row {rowIndex + 2}"); // +2 vì 1 là header, 1 là index base 0
+						}
+					}
+				}
+				newDataTable.Rows.Add(newRow);
+			}
+			if ( missingColumns.Count > 0 )
+			{
+				throw new ExceptionFormat("Invalid Excel Format" , missingColumns);
+			}
+			return newDataTable;
+		}
+		#endregion
+
 		#region Get Template Json
 		/// <summary>
 		/// Hàm đọc path json dựa theo table name 
@@ -190,45 +333,57 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 		/// <param name="tableName"></param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		public async Task<JsonDefination> GetTemplateByTableNameAsync(string tableName)
+		public async Task<JsonDefination> GetTemplateModelAsync(string tableName)
 		{
-			var jsonPath = Path.Combine(AppContext.BaseDirectory , $"Entities/{tableName}Json.json");
-			if ( !File.Exists(jsonPath) )
-				throw new FileNotFoundException($"File JSON for '{tableName}' does not exist.");
-			var jsonContent = await File.ReadAllTextAsync(jsonPath);
+			var folderPath = Path.Combine(AppContext.BaseDirectory , "Entities");
+			if ( !Directory.Exists(folderPath) )
+				throw new ExceptionFormat($"Folder not found: {folderPath}");
+			var expectedFileName = $"{tableName}Model.json";
+			// Tìm file bất kể hoa thường
+			var matchedFile = Directory.GetFiles(folderPath)
+				.FirstOrDefault(f => string.Equals(Path.GetFileName(f) , expectedFileName , StringComparison.OrdinalIgnoreCase));
+			if ( matchedFile == null )
+				throw new ExceptionFormat($"JSON file not match: {expectedFileName}.");
+			var jsonContent = await File.ReadAllTextAsync(matchedFile);
 			var template = JsonConvert.DeserializeObject<JsonDefination>(jsonContent);
 			return template!;
 		}
+
 		/// <summary>
 		/// Hàm đọc path json metadata dựa theo table name 
 		/// </summary>
 		/// <param name="tableName"></param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		//public async Task<MetadataResponse> GetTemplateMetadataByTableNameAsync(string tableName)
-		//{
-		//	var jsonPath = Path.Combine(AppContext.BaseDirectory , $"Controllers/Form/{tableName}.json");
-		//	if ( !File.Exists(jsonPath) )
-		//		throw new FileNotFoundException($"File JSON for '{tableName}' does not exist.");
+		public async Task<object> GetTemplateMetadataAsync(string tableName)
+		{
+			var folderPath = Path.Combine(AppContext.BaseDirectory , $"Forms/{tableName}.json");
+			if ( !File.Exists(folderPath) )
+				throw new ExceptionFormat($"Folder not found: {folderPath}");
+			var expectedFileName = $"{tableName}.json";
+			var matchedFile = Directory.GetFiles(folderPath)
+				.FirstOrDefault(f => string.Equals(Path.GetFileName(f) , expectedFileName , StringComparison.OrdinalIgnoreCase));
+			if ( matchedFile == null )
+				throw new ExceptionFormat($"JSON file not match: {expectedFileName}.");
+			var jsonContent = await File.ReadAllTextAsync(matchedFile);
+			var template = JsonConvert.DeserializeObject<object>(jsonContent);
+			return template!;
+		}
 
-		//	var jsonContent = await File.ReadAllTextAsync(jsonPath);
-		//	var template = JsonConvert.DeserializeObject<MetadataResponse>(jsonContent);
-		//	return template!;
-		//}
 		/// <summary>
 		/// Hàm lấy toàn bộ định nghĩa JSON schema cho tất cả các bảng.
 		/// </summary>
 		/// <returns>Danh sách SqlJsonDefination</returns>
 		/// <exception cref="DirectoryNotFoundException">Nếu không tìm thấy thư mục schema</exception>
-		public async Task<List<JsonDefination>> GetAllTemplateDefinitionsAsync()
+		public async Task<List<JsonDefination>> GetAllTemplateModelAsync()
 		{
 			var results = new List<JsonDefination>();
 			string folderPath = Path.Combine(AppContext.BaseDirectory , "Entities");
 
 			if ( !Directory.Exists(folderPath) )
-				throw new DirectoryNotFoundException($"Không tìm thấy thư mục: {folderPath}");
+				throw new DirectoryNotFoundException($"Not found folder: {folderPath}");
 
-			var files = Directory.GetFiles(folderPath , "*Json.json");
+			var files = Directory.GetFiles(folderPath , "*Model.json");
 
 			foreach ( var file in files )
 			{
@@ -239,31 +394,29 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 					if ( def != null )
 					{
 						var fileName = Path.GetFileNameWithoutExtension(file); // ví dụ: DonHangJson
-						def.Model = fileName.Replace("Json" , "");          // Lấy lại tên bảng gốc
+						def.Model = fileName.Replace("Model" , "");          // Lấy lại tên bảng gốc
 						results.Add(def);
 					}
 				}
 				catch ( Exception ex )
 				{
-					Console.WriteLine($"Lỗi khi đọc file {file}: {ex.Message}");
+					Console.WriteLine($"Error when read file {file}: {ex.Message}");
 				}
 			}
 			return results;
 		}
+
 		/// <summary>
-		/// Hàm lấy primarykey 
+		/// Get primary key of table
 		/// </summary>
-		/// <returns>Tên primary key</returns>
-		private string GetKeyField(JsonDefination sqlJsonDefination)
+		/// <param name="schema"></param>
+		/// <returns>List or one primary key</returns>
+		private List<string> GetPrimaryKeys(JsonDefination schema)
 		{
-			foreach ( var key in sqlJsonDefination.Schema.Fields )
-			{
-				if ( key.PrimaryKey == true )
-				{
-					return key.Name;
-				}
-			}
-			return "";
+			return schema.Schema.Fields
+				.Where(f => f.PrimaryKey == true)
+				.Select(f => f.Name)
+				.ToList();
 		}
 		#endregion
 
@@ -487,7 +640,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 		}
 
 		/// <summary>
-		/// Hàm kiểm tra database đã tồn tại chưa 
+		/// Check duplicate
 		/// </summary>
 		/// <param name="oldTable"></param>
 		/// <param name="sqlDefination"></param>
@@ -513,11 +666,13 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 				string message = field.Message;
 				int threshold = int.Parse(field.Threshold ?? "0");
 				string tableName = sqlDefination.Model;
+
 				//param field name
 				string whereClause = field.CheckQuery!.Substring(5).Trim();
 				string paramName = $"@{char.ToLowerInvariant(fieldName[0])}{fieldName.Substring(1)}";
 				string onCondition = whereClause.Replace(paramName , $"t.[{fieldName}]");
-				// tạo câu truy vấn kiểm tra bulk với db
+
+				//tạo câu truy vấn kiểm tra bulk với db
 				string bulkCheckQuery =
 					$@"
 					SELECT t.[{fieldName}], COUNT(*) AS Total
@@ -561,78 +716,6 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
 				}
 			}
 			return (errors.Count == 0, errors);
-		}
-		#endregion
-
-		#region external function
-		/// <summary>
-		/// Hàm kiểm tra col table có map với col trong db hay không 
-		/// </summary>
-		/// <param name="oldDataTable"></param>
-		/// <param name="excelColumn"></param>
-		/// <returns>New Table</returns>
-		public (DataTable, List<string>?) CheckExcelColumnMapping(DataTable oldDataTable , JsonDefination.ExcelIntegrationMap excelColumn)
-		{
-			var newDataTable = new DataTable();
-			var missingColumns = new List<string>();
-			// Lưu danh sách các tên cột đã map để copy dữ liệu sau
-			var matchedColumns = new List<string>();
-			foreach ( var excelCol in excelColumn.ColumnMapping )
-			{
-				// Kiểm tra xem cột excel này có trong oldDataTable không
-				bool columnExists = oldDataTable.Columns
-					.Cast<DataColumn>()
-					.Any(c => string.Equals(c.ColumnName.Trim() , excelCol.FieldName.Trim() , StringComparison.OrdinalIgnoreCase));
-
-				if ( excelCol.Required && !columnExists )
-				{
-					// Nếu cột required mà không tồn tại thì thêm vào danh sách thiếu
-					missingColumns.Add($"Column {excelCol.FieldName} is required.");
-				}
-				else if ( columnExists )
-				{
-					// Nếu tồn tại thì thêm cột vào newDataTable
-					newDataTable.Columns.Add(excelCol.FieldName); // Dùng tên chuẩn từ mapping
-					matchedColumns.Add(excelCol.FieldName);
-				}
-			}
-			//nếu có lỗi thì trả về lỗi luôn
-			if ( missingColumns.Count() > 0 )
-				return (oldDataTable, missingColumns);
-			// Tạo map field -> required
-			var requiredFields = new Dictionary<string , bool>();
-			foreach ( var col in excelColumn.ColumnMapping )
-			{
-				requiredFields[col.FieldName.Trim()] = col.Required;
-			}
-			// Thêm dữ liệu từ oldDataTable vào newDataTable chỉ với các cột đã match
-			for ( int rowIndex = 0; rowIndex < oldDataTable.Rows.Count; rowIndex++ )
-			{
-				var oldRow = oldDataTable.Rows[rowIndex];
-				var newRow = newDataTable.NewRow();
-
-				foreach ( string col in matchedColumns )
-				{
-					var oldCol = oldDataTable.Columns
-						.Cast<DataColumn>()
-						.FirstOrDefault(c => string.Equals(c.ColumnName.Trim() , col , StringComparison.OrdinalIgnoreCase));
-					if ( oldCol != null )
-					{
-						var value = oldRow[oldCol];
-						newRow[col] = value;
-						// Kiểm tra nếu là cột required và giá trị null hoặc rỗng
-						if ( requiredFields[col]
-							&& (value == null || value == DBNull.Value || string.IsNullOrWhiteSpace(value.ToString())) )
-						{
-							missingColumns.Add($"Missing value in column '{col}' at row {rowIndex + 2}"); // +2 vì 1 là header, 1 là index base 0
-						}
-					}
-				}
-				newDataTable.Rows.Add(newRow);
-			}
-			if ( missingColumns.Count > 0 )
-				return (newDataTable, missingColumns);
-			return (newDataTable, null);
 		}
 		#endregion
 	}

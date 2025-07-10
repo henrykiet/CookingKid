@@ -1,0 +1,171 @@
+{
+  "model": "Customer",
+  "schema": {
+    "fields": [
+      {
+        "name": "CustomerId",
+        "property": "customerId",
+        "type": "string",
+        "sqlType": "VARCHAR(50)",
+        "primaryKey": true
+      },
+      {
+        "name": "FullName",
+        "property": "fullName",
+        "type": "string",
+        "sqlType": "NVARCHAR(255)"
+      },
+      {
+        "name": "EstablishmentDate",
+        "property": "establishmentDate",
+        "type": "date",
+        "sqlType": "DATE"
+      },
+      {
+        "name": "BirthDate",
+        "property": "birthDate",
+        "type": "date",
+        "sqlType": "DATE"
+      },
+      {
+        "name": "RegisteredAddress",
+        "property": "registeredAddress",
+        "type": "string",
+        "sqlType": "NVARCHAR(255)"
+      },
+      {
+        "name": "DeliveryAddress",
+        "property": "deliveryAddress",
+        "type": "string",
+        "sqlType": "NVARCHAR(255)"
+      },
+      {
+        "name": "PhoneNumber",
+        "property": "phoneNumber",
+        "type": "string",
+        "sqlType": "VARCHAR(20)"
+      },
+      {
+        "name": "Email",
+        "property": "email",
+        "type": "string",
+        "sqlType": "VARCHAR(100)"
+      },
+      {
+        "name": "Note",
+        "property": "note",
+        "type": "string",
+        "sqlType": "NVARCHAR(MAX)"
+      }
+    ]
+  },
+  "excelIntegration": {
+    "sheetName": "Customer",
+    "columnMapping": [
+      {
+        "excelColumn": "CustomerId",
+        "fieldName": "CustomerId",
+        "required": true
+      },
+      {
+        "excelColumn": "FullName",
+        "fieldName": "FullName",
+        "required": true,
+        "default": ""
+      },
+      {
+        "excelColumn": "EstablishmentDate",
+        "fieldName": "EstablishmentDate",
+        "required": false
+      },
+      {
+        "excelColumn": "BirthDate",
+        "fieldName": "BirthDate",
+        "required": false
+      },
+      {
+        "excelColumn": "RegisteredAddress",
+        "fieldName": "RegisteredAddress",
+        "required": false
+      },
+      {
+        "excelColumn": "DeliveryAddress",
+        "fieldName": "DeliveryAddress",
+        "required": false
+      },
+      {
+        "excelColumn": "PhoneNumber",
+        "fieldName": "PhoneNumber",
+        "required": false
+      },
+      {
+        "excelColumn": "Email",
+        "fieldName": "Email",
+        "required": false
+      },
+      {
+        "excelColumn": "Note",
+        "fieldName": "Note",
+        "required": false
+      }
+    ],
+    "templateRules": {
+      "fileFormat": "xlsx",
+      "firstRowData": 2,
+      "maxRows": 20000
+    }
+  },
+  "checking": {
+    "rules": [
+      {
+        "fieldName": "CustomerId",
+        "type": "length",
+        "minLength": "1",
+        "maxLength": "50",
+        "message": "CustomerId phải có độ dài từ 1 đến 50 ký tự"
+      },
+      {
+        "fieldName": "FullName",
+        "type": "length",
+        "minLength": "1",
+        "maxLength": "255",
+        "message": "FullName phải từ 1 đến 255 ký tự"
+      },
+      {
+        "fieldName": "PhoneNumber",
+        "type": "pattern",
+        "pattern": "[0-9+- ]%",
+        "message": "Số điện thoại không hợp lệ"
+      },
+      {
+        "fieldName": "Email",
+        "type": "pattern",
+        "pattern": "%@%.%",
+        "message": "Email không hợp lệ"
+      },
+      {
+        "fieldName": "FullName",
+        "type": "databaseCheck",
+        "checkQuery": "WHERE FullName = @fullName",
+        "threshold": "1",
+        "message": "FullName already exists in database"
+      },
+      {
+        "fieldName": "CustomerId",
+        "type": "databaseCheck",
+        "checkQuery": "WHERE CustomerId = @customerId",
+        "threshold": "0",
+        "message": "CustomerId already exists in database"
+      }
+    ]
+  },
+  "dataProcessing": {
+    "sqlStatements": {
+      "insert": "IF @customerId IS NULL OR @customerId = '' SET @customerId = CONVERT(VARCHAR(50), NEWID());\nIF EXISTS (SELECT 1 FROM Customer WHERE CustomerId = @customerId) THROW 50002, 'Duplicate CustomerId', 1;\nINSERT INTO Customer (CustomerId, FullName, EstablishmentDate, BirthDate, RegisteredAddress, DeliveryAddress, PhoneNumber, Email, Note) VALUES (@customerId, @fullName, @establishmentDate, @birthDate, @registeredAddress, @deliveryAddress, @phoneNumber, @email, @note);",
+      "update": "IF @customerId IS NULL THROW 50003, 'CustomerId is required for update', 1;\nIF NOT EXISTS (SELECT 1 FROM Customer WHERE CustomerId = @customerId) THROW 50004, 'Customer not found', 1;\nUPDATE Customer SET FullName = @fullName, EstablishmentDate = @establishmentDate, BirthDate = @birthDate, RegisteredAddress = @registeredAddress, DeliveryAddress = @deliveryAddress, PhoneNumber = @phoneNumber, Email = @email, Note = @note WHERE CustomerId = @customerId;",
+      "delete": "IF @customerId IS NULL THROW 50005, 'CustomerId is required for delete', 1;\nIF NOT EXISTS (SELECT 1 FROM Customer WHERE CustomerId = @customerId) THROW 50006, 'Customer not found', 1;\nDELETE FROM Customer WHERE CustomerId = @customerId;",
+      "myTableType": "CREATE TYPE dbo.CustomerTableType AS TABLE (CustomerId VARCHAR(50) PRIMARY KEY, FullName NVARCHAR(255), EstablishmentDate DATE, BirthDate DATE, RegisteredAddress NVARCHAR(255), DeliveryAddress NVARCHAR(255), PhoneNumber VARCHAR(20), Email VARCHAR(100), Note NVARCHAR(MAX));",
+      "dropTableType": "DROP PROCEDURE IF EXISTS usp_UpsertCustomer; DROP TYPE IF EXISTS dbo.CustomerTableType;"
+    }
+  }
+}

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Backend_Cooking_Kid_BusinessLogic.Services
 {
-	public class UserService
+	public class DataService
 	{
+
 	}
 }

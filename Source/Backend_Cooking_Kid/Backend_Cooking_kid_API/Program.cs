@@ -1,5 +1,6 @@
 ﻿using Backend_Cooking_Kid_BusinessLogic.Services;
 using Backend_Cooking_Kid_DataAccess.Repositories;
+using Backend_Cooking_Kid_DataAccess.ValidateConverts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -64,14 +65,13 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if ( app.Environment.IsDevelopment() )
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

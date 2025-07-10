@@ -1,0 +1,6 @@
+﻿namespace Backend_Cooking_kid_API.FastReports
+{
+    public class customer
+    {
+    }
+}
