@@ -1,0 +1,222 @@
+<div class="dynamic-popup">
+  <ng-container *ngIf="loading">
+    <p>Loading form...</p>
+  </ng-container>
+  <ng-container *ngIf="!loading && form">
+    <h3 class="my-2">{{ form.titleForm }}</h3>
+    <form #myForm="ngForm" [formGroup]="dynamicFormGroup">
+      <!-- Master -->
+      <div [class]="form.classForm + 'glass'" [style]="form.style">
+        <ng-container *ngFor="let field of form?.fieldControls">
+          <!-- text -->
+          <div
+            *ngIf="
+              ['text', 'email', 'password', 'number', 'date'].includes(
+                field.type
+              )
+            "
+            [class]="field.class"
+          >
+            <label Class="form-label">{{ field.label }}</label>
+            <input
+              [formControlName]="field.name"
+              class="form-control"
+              [placeholder]="field.placeHolder"
+              [type]="field.type"
+            />
+            <small
+              class="text-danger"
+              *ngIf="
+                dynamicFormGroup.get(field.name)?.invalid &&
+                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
+              "
+              >{{ getValidationErrors(field.name, field.validators) }}</small
+            >
+          </div>
+          <!-- select -->
+          <div *ngIf="field.type === 'select'" [class]="field.class">
+            <label Class="form-label">{{ field.label }}</label>
+            <select
+              class="form-select"
+              formControlName="{{ field.name }}"
+              aria-label="Default select example"
+            >
+              <div style="border-radius: 1rem">
+                <option selected value="">Choose...</option>
+                <ng-container *ngFor="let option of field.options">
+                  <option [value]="option.id">{{ option.value }}</option>
+                </ng-container>
+              </div>
+            </select>
+            <small
+              class="text-danger"
+              *ngIf="
+                dynamicFormGroup.get(field.name)?.invalid &&
+                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
+              "
+              >{{ getValidationErrors(field.name, field.validators) }}</small
+            >
+          </div>
+          <!-- Radio -->
+          <div *ngIf="field.type === 'radio'" [class]="field.class">
+            <label Class="form-label">{{ field.label }}</label>
+            <ng-container *ngFor="let option of field.radioOptions">
+              <div class="form-check">
+                <input
+                  formControlName="{{ field.name }}"
+                  [value]="option"
+                  class="form-check-input"
+                  type="radio"
+                />
+                <label class="form-check-lable" [for]="field.name">
+                  {{ option }}
+                </label>
+              </div>
+            </ng-container>
+            <small
+              class="text-danger"
+              *ngIf="
+                dynamicFormGroup.get(field.name)?.invalid &&
+                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
+              "
+              >{{ getValidationErrors(field.name, field.validators) }}</small
+            >
+          </div>
+        </ng-container>
+      </div>
+
+      <ng-container *ngIf="form.detailForms && form.detailForms.length > 0">
+        <!-- button change detail -->
+        <div
+          class="d-flex justify-content-start m-2 px-3 glass"
+          style="overflow-x: auto; white-space: nowrap; border-radius: 3rem"
+        >
+          <div class="" style="display: inline-flex">
+            <button
+              *ngFor="let detailForm of form.detailForms; let i = index"
+              type="button"
+              class="button-glass"
+              [ngClass]="{
+                'btn-primary': activeDetailIndex === i,
+                'btn-outline-primary': activeDetailIndex !== i,
+                'active-tab': activeDetailIndex === i
+              }"
+              (click)="setActiveDetail(i)"
+            >
+              {{ detailForm.titleForm }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail Forms -->
+        <ng-container
+          *ngFor="let detailForm of form.detailForms; let i = index"
+        >
+          <div *ngIf="activeDetailIndex === i">
+            <table
+              [class]="detailForm.classForm + ' glass'"
+              [style]="detailForm.style"
+            >
+              <thead>
+                <tr>
+                  <th
+                    *ngFor="let field of detailForm?.fieldControls"
+                    class="text-center"
+                  >
+                    <div>
+                      {{ field.label }}
+                    </div>
+                  </th>
+                  <th Class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody
+                *ngIf="
+                  detailForm.tableName &&
+                  dynamicFormGroup.get(detailForm.tableName)
+                "
+                [formArrayName]="detailForm.tableName"
+              >
+                <tr
+                  *ngFor="
+                    let row of getInitialData(detailForm.tableName)?.controls ||
+                      [];
+                    let rowIndex = index
+                  "
+                  [formGroupName]="rowIndex"
+                >
+                  <td
+                    *ngFor="let field of detailForm?.fieldControls"
+                    class="text-center"
+                  >
+                    <input
+                      [type]="field.type"
+                      [formControlName]="field.name"
+                      [class]="field.class"
+                      [style]="field.style"
+                      [placeholder]="field.placeHolder"
+                    />
+                    <small class="text-danger">
+                      {{
+                        getValidationErrors(field.name, field.validators, row)
+                      }}
+                    </small>
+                  </td>
+                  <td
+                    style="
+                      text-align: center;
+                      padding: 0.25rem;
+                      vertical-align: middle;
+                    "
+                  >
+                    <div
+                      class="d-flex justify-content-center gap-2"
+                      style="height: 100%; align-items: center"
+                    >
+                      <ng-container
+                        *ngFor="let button of detailForm.buttonControls"
+                      >
+                        <button
+                          [type]="button.type"
+                          class="btn-icon"
+                          [style]="button.style"
+                          (click)="
+                            handelForm(false);
+                            invokeAction(button.click, detailForm, rowIndex)
+                          "
+                        >
+                          <i
+                            [class]="button.class || ''"
+                            [ngClass]="button.name || ''"
+                          >
+                            {{ button.label }}
+                          </i>
+                        </button>
+                      </ng-container>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- button master -->
+      <div class="d-flex justify-content-end gap-2 m-3">
+        <ng-container *ngFor="let button of form.buttonControls">
+          <button
+            [type]="button.type"
+            class="btn-icon custom-btn"
+            [style]="button.style"
+            (click)="handelForm(true); invokeAction(button.click)"
+          >
+            <i [class]="button.class || ''" [ngClass]="button.name || ''">
+              {{ button.label }}
+            </i>
+          </button>
+        </ng-container>
+      </div>
+    </form>
+  </ng-container>
+</div>

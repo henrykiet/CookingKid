@@ -1,0 +1,32 @@
+<div class="navbar">
+  <div class="header">
+    <div class="header-left"></div>
+    <div class="header-center">
+      <h2>DEV KID</h2>
+    </div>
+    <div class="header-right">
+      <button
+        class="btn-header-user"
+        [class.menu-open]="isShowUserMenu"
+        (click)="toggleUser()"
+      >
+        <i class="user-icon fas fa-user"></i>
+        <span class="user-fullName">FullName</span>
+        <ul *ngIf="isShowUserMenu" class="dropdown-user-menu">
+          <li>
+            <i class="user-icon fas fa-user"></i>
+            <a href="#">account</a>
+          </li>
+          <li>
+            <i class="user-icon fas fa-setting"></i>
+            <a href="#">setting</a>
+          </li>
+          <li>
+            <i class="user-icon fas fa-box"></i>
+            <a href="#" style="text-decoration: none">action</a>
+          </li>
+        </ul>
+      </button>
+    </div>
+  </div>
+</div>

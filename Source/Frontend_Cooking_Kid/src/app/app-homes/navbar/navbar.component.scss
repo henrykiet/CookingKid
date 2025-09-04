@@ -1,0 +1,102 @@
+.navbar {
+  background: #263238;
+  transition: all 0.5s ease;
+  height: 4rem;
+  top: 0;
+  z-index: 0;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0rem 0 0.65rem 0 #8690a3;
+  position: sticky;
+  
+  .header {
+    align-items: center;
+    order: 2;
+    width: 100%;
+    transition: all 0.3s ease;
+    color: #fff;
+    justify-content: space-between;
+    display: flex;
+
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 180px;
+    }
+
+    .header-center {
+      justify-content: center;
+      flex: 1;//chiếm giữa
+      text-align: center;
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: red;
+        margin: 0;
+      }
+    }
+
+    .header-right {
+      justify-content: flex-end;
+    
+      .btn-header-user {
+        min-width: 180px;
+        position: relative;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        background: #263238;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        .dropdown-user-menu {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background: #fff;
+          color: #000;
+          border-radius: 6px;
+          margin: 0.3rem 0 0 0;
+          padding: 0.5rem 0;
+          z-index: 9999;
+          min-width: 180px;
+          margin: 0;
+          list-style: none;
+          border: 1px solid #ddd;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          
+          li {
+            padding: 0.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            a {
+              text-decoration: none;
+              color: inherit;
+              flex: 1;
+            }
+          }
+          
+          li:hover {
+            border-radius: 2rem;
+            background: #f5f5f5;
+          }
+        }
+
+        &:not(.menu-open):hover {
+          color: red;
+        }
+        
+        &.menu-open {
+          background: #263238;
+        }
+      }
+    }
+  }
+}

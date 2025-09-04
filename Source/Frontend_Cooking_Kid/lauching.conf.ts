@@ -1,4 +1,4 @@
-export const environment = {
+export const lauching = {
   production: false,
   apiUrl: 'https://localhost:44347', // URL của API backend
   defaultLanguage: 'vi', // Ngôn ngữ mặc định

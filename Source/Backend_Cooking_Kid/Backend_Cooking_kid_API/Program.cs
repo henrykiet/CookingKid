@@ -24,6 +24,7 @@ builder.Services.AddCors(options =>
 				   .AllowAnyHeader();
 		});
 });
+
 // Cấu hình Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -56,6 +57,8 @@ builder.Services.AddSwaggerGen(c =>
 //Scope
 builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>));
 builder.Services.AddScoped<IFileService , FileService>();
+builder.Services.AddScoped<IAuthService , AuthService>();
+builder.Services.AddScoped<IDataService , DataService>();
 
 
 
@@ -71,11 +74,14 @@ if ( app.Environment.IsDevelopment() )
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-app.UseCors("AllowAll");
 app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

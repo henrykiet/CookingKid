@@ -1,0 +1,60 @@
+<div
+  class="sidebar"
+  [ngClass]="{
+    'sidebar-collapsed': collapsed
+  }"
+>
+  <div class="logo-container">
+    <button class="logo" (click)="toggleCollapse()">K</button>
+    <div class="logo-text" *ngIf="collapsed">
+      <a href="/" class="a-logo" style="text-decoration: none; color: #fff">
+        <i class="">icon</i>
+        <span>Kid</span>
+      </a>
+    </div>
+  </div>
+  <ul class="sidebar-nav">
+    <li class="sidebar-nav-item" *ngFor="let item of sideData">
+      <!-- bảng cha  -->
+      <a
+        class="sidebar-nav-link"
+        href="javascript:void(0)"
+        (click)="onItemClick(item, $event)"
+        [routerLink]="!item.children ? [item.routeLink] : null"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <i class="sidebar-nav-icon" [class]="item.icon"></i>
+        <span class="sidebar-nav-text" *ngIf="collapsed">{{ item.label }}</span>
+      </a>
+      <!-- danh sách bảng con -->
+      <ul class="sidebar-subnav" *ngIf="item.expanded">
+        <li
+          class="sidebar-subnav-item"
+          *ngFor="let children of item.children; let i = index; let last = last"
+        >
+          <div class="line-tree">
+            <div
+              class="tree-h"
+              [ngStyle]="{
+                height: last ? '50%' : '100%'
+              }"
+            ></div>
+            <div class="tree-v"></div>
+          </div>
+          <a
+            class="sidebar-nav-link"
+            [routerLink]="[children.routeLink]"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <!-- <i class="sidebar-nav-icon" [ngClass]="children.icon"></i> -->
+            <span class="sidebar-nav-text" *ngIf="collapsed">{{
+              children.label
+            }}</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>

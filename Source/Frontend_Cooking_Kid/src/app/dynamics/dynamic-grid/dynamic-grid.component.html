@@ -1,1 +1,40 @@
-<p>dynamic-grid works!</p>
+<div class="dynamic-grid">
+     <h3 class="my-2">{{metaform?.form?.titleForm}}</h3>
+     <!-- search -->
+     <div class="search-box text-center my-2">Search</div>
+
+     <div style="overflow-x:auto" class="my-2">
+          <table class="table table-striped table-bordered glass"
+               style="width: auto; max-width: 100%; table-layout: auto;">
+               <thead>
+                    <tr>
+                         <th *ngFor="let field of metaform?.form?.fieldControls" class="text-center">
+                              <div>
+                                   {{ field.label }}
+                              </div>
+                         </th>
+                         <th class="text-center">Action</th>
+                    </tr>
+               </thead>
+               <tbody>
+                    <tr *ngFor="let row of metaform?.form?.initialDatas; let rowIndex = index">
+                         <td *ngFor="let field of metaform?.form?.fieldControls" class="text-center">
+                              {{ row[field.name] }}
+                         </td>
+                         <td style="text-align: center; padding: 0.25rem; vertical-align: middle;">
+                              <div class="d-flex justify-content-center gap-2"
+                                   style="height: 100%; align-items: center">
+                                   <ng-container *ngFor="let button of metaform?.form?.buttonControls">
+                                        <button [type]="button.type" class="btn-icon" [style]="button.style">
+                                             <i [class]="button.class || ''" [ngClass]="button.name || ''">
+                                                  {{ button.label }}
+                                             </i>
+                                        </button>
+                                   </ng-container>
+                              </div>
+                         </td>
+                    </tr>
+               </tbody>
+          </table>
+     </div>
+</div>

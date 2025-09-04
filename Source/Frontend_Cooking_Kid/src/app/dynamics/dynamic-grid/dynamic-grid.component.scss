@@ -1,0 +1,58 @@
+.search-box {
+  border: 1px solid #ccc;      /* khung */
+  border-radius: 8px;          /* bo góc */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* bóng */
+  padding: 0.5rem 1rem;        /* khoảng cách trong */
+  display: inline-block;       /* gọn vừa nội dung */
+  background-color: #71e2dd;      /* nền trắng cho rõ bóng */
+  align-items: center;
+}
+
+
+
+.glass {
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.2);
+  border-collapse: collapse;
+  border-spacing: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: rgb(6, 0, 10);
+}
+
+th,
+td {
+  background: rgba(255, 255, 255, 0.15);
+  align-items: center;
+  height: 3.5rem;
+  justify-content: center;
+}
+
+input,
+select {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 1rem;
+  padding: 0.5rem;
+}
+
+/* Chỉ bo góc top cho thead và bottom cho tbody */
+.glass thead tr:first-child th:first-child {
+  border-top-left-radius: 0.7rem;
+}
+
+.glass thead tr:first-child th:last-child {
+  border-top-right-radius: 0.7rem;
+}
+
+.glass tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 0.7rem;
+}
+
+.glass tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 0.7rem;
+}
+
+

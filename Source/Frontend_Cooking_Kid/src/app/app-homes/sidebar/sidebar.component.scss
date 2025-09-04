@@ -1,0 +1,204 @@
+.sidebar {
+  background: #263238;
+  transition: all 0.5s ease;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  width: 5rem;
+  height: 100vh;
+  border-bottom-right-radius: 4px;
+  // box-shadow: 0.2rem 0 0.7rem 0 #8690a3;
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    padding: 0.938rem 0.938rem 0 0.938rem;
+    width: 100%;
+    .logo {
+      background: #fff;
+      text-align: center;
+      padding: 0.313rem;
+      border-radius: 0.313rem;
+      min-width: 3rem;
+      width: 3rem;
+      font-size: 24px;
+      font-weight: 900;
+      cursor: pointer;
+      border: none;
+    }
+    .logo-text {
+      margin-left: 3rem;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+    .logo-text:hover span,
+    .logo-text:hover i {
+      color: red;
+    }
+    .btn-close {
+      color: #fff;
+      margin-left: auto;
+      cursor: pointer;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background-color: transparent;
+      border: none;
+      .fa-times {
+        color: #fff;
+        font-size: 24px;
+      }
+    }
+  }
+  &.sidebar-collapsed {
+    width: 16.5625rem;
+  }
+  &.sidebar-expanded {
+    width: 7rem;
+  }
+}
+//parent
+.sidebar-nav {
+  list-style: none;
+  padding: 0.938rem;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  height: calc(100% - 3.65rem);
+  cursor: pointer;
+  .sidebar-nav-item {
+    width: 100%;
+    margin-bottom: 0.625rem;
+    border-radius: 0.625rem;
+
+    .sidebar-nav-link {
+      display: flex;
+      align-items: center;
+      height: 2.5rem;
+      color: #f3f3f3;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      border-radius: 0.625rem;
+
+      .sidebar-nav-icon {
+        font-size: 22px;
+        width: 2rem;
+        min-width: 2rem;
+        margin: 0.5rem;
+        text-align: center;
+      }
+    }
+  }
+}
+//child
+.sidebar-subnav {
+  list-style: none;
+  padding-left: 1.5rem;
+  transition: max-height 0.3s ease;
+
+  .sidebar-subnav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    .sidebar-nav-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 2.5rem;
+      font-size: 15px;
+      color: #f3f3f3;
+      border-radius: 0.625rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      // .sidebar-nav-icon {
+      //   font-size: 18px;
+      //   width: 2rem;
+      //   text-align: center;
+      //   margin: 0.5rem;
+      // }
+    }
+    .line-tree {
+      display: flex;
+      position: relative;
+      width: 1.25rem;
+      justify-content: center;
+      min-height: 3rem;
+      flex-direction: column;
+      align-self: stretch;
+      .tree-h {
+        flex: unset;
+        margin-bottom: auto;
+        width: 0.01rem;
+        height: 100%;
+        background-color: #fff;
+      }
+      .tree-v {
+        width: 1.2rem;
+        height: 0.01rem;
+        top: 50%;
+        background-color: #fff;
+        position: absolute;
+        transform: translateY(-50%);
+
+        // Mũi tên bên phải
+        // &::after {
+        //   content: "";
+        //   position: absolute;
+        //   right: -0.4rem;
+        //   top: 50%;
+        //   transform: translateY(-50%);
+        //   border-top: 0.3rem solid transparent;
+        //   border-bottom: 0.3rem solid transparent;
+        //   border-left: 0.4rem solid #fff; // màu mũi tên
+        // }
+      }
+    }
+  }
+}
+.sidebar-nav-text {
+  margin: 0.5rem;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+/* Hover parent chỉ sáng khi chuột ở đúng link parent */
+.sidebar-nav > .sidebar-nav-item > .sidebar-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Parent active */
+.sidebar-nav > .sidebar-nav-item > .sidebar-nav-link.active {
+  background-color: #fff;
+  color: #000;
+
+  .sidebar-nav-icon,
+  .sidebar-nav-text {
+    color: #000;
+  }
+}
+/* Ngăn child bị ảnh hưởng từ hover parent */
+.sidebar-subnav .sidebar-nav-link {
+  background-color: transparent !important;
+  color: #f3f3f3;
+}
+
+/* Hover riêng cho child */
+.sidebar-subnav .sidebar-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #000 !important;
+}
+
+/* Child active */
+.sidebar-subnav .sidebar-subnav-item .sidebar-nav-link.active {
+  background-color: #fff !important; /* Nền trắng rõ ràng */
+  color: #000 !important; /* Chữ đen rõ ràng */
+  .sidebar-nav-icon,
+  .sidebar-nav-text {
+    color: #000 !important; /* Ép màu icon + text */
+  }
+}
