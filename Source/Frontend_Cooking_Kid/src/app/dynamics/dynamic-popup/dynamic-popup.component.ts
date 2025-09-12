@@ -8,18 +8,40 @@ import {
   Validators,
 } from '@angular/forms';
 import { DynamicService } from '../../services/dynamic.service';
-import { IForm, IValidator } from '../../models/dynamic.model';
+import { IForm, IMetadataForm, IValidator } from '../../models/dynamic.model';
 import { CommonModule } from '@angular/common';
+import { ActionBoxComponent } from '../../templates/boxs/action-box/action-box.component';
+import { ButtonComponent } from '../../templates/button/button.component';
+import { InputComponent } from '../../templates/input/input.component';
+import { SelectComponent } from '../../templates/select/select.component';
+import { RadioComponent } from '../../templates/radio/radio.component';
+import { LeafWrapperComponent } from '../../templates/leaf-wrapper/leaf-wrapper.component';
+import { PaginationComponent } from '../../templates/pagination/pagination.component';
 
 @Component({
   selector: 'app-dynamic-popup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    ActionBoxComponent,
+    ButtonComponent,
+    InputComponent,
+    SelectComponent,
+    RadioComponent,
+    PaginationComponent,
+  ],
   templateUrl: './dynamic-popup.component.html',
   styleUrl: './dynamic-popup.component.scss',
 })
 export class DynamicPopupComponent {
+  currentPage: number = 1;
+  totalPages: number = 10;
+  onPageChange($event: number) {
+    throw new Error('Method not implemented.');
+  }
   @Input() form: IForm | null = null;
+  metadataForm: IMetadataForm | null = null;
   loading: boolean = true;
   fb = inject(FormBuilder);
   dynamicFormGroup: FormGroup = this.fb.group({}, { updateOn: 'submit' });
@@ -33,6 +55,10 @@ export class DynamicPopupComponent {
     return typeof window !== 'undefined';
   }
   ngOnInit(): void {
+    if (localStorage.getItem('metadataConfig')) {
+      this.metadataForm = JSON.parse(localStorage.getItem('metadataConfig')!);
+      console.log('metadata', this.metadataForm);
+    }
     if (this.form) {
       this.validations();
       this.loading = false;
@@ -49,14 +75,13 @@ export class DynamicPopupComponent {
     //   this.loading = false;
     // }
     else if (this.isBrowser()) {
-      console.log('gọi hàm pop');
       this.getPopupForm();
     }
   }
 
   getPopupForm(): void {
     this.loading = true;
-    this.dynamicService.getMetadataForm().subscribe({
+    this.dynamicService.handleMetadataForm(this.metadataForm).subscribe({
       next: (res) => {
         if (res && res.form) {
           this.form = res.form;
@@ -163,7 +188,7 @@ export class DynamicPopupComponent {
     return this.dynamicFormGroup.get(tableName) as FormArray;
   }
 
-  handelForm(is: boolean): void {
+  handelMasterForm(is: boolean): void {
     this.isMaster = is;
     console.log('isMaster:', this.isMaster);
   }

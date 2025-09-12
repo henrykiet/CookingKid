@@ -2,5 +2,9 @@
 {
 	public class MetadataRequest
 	{
-	}
+        public string? Controller { get; set; }
+        public string? Action { get; set; }
+        public string? vCId { get; set; }
+        public string? vCDate { get; set; }
+    }
 }

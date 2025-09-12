@@ -12,7 +12,7 @@ export const sidebarData = [
       {
         icon: 'fas fa-home',
         label: 'Danh mục popup',
-        routeLink: 'dynamicPopup',
+        routeLink: 'dynamic/popup',
       },
     ],
   },

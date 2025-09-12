@@ -1,0 +1,65 @@
+.pagination {
+  margin: 0;
+}
+
+.page-item.disabled .page-link {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+nav {
+  border-radius: 0 0 1rem 1rem; /* chỉ bo dưới */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+// ul.pagination {
+//   display: inline-flex;         /* cho pagination thành 1 khối */
+//   gap: 0.4rem;
+//   padding: 0.25rem 0.5rem;      /* padding tạo vùng glass */
+//   border-radius: 1rem;
+//   background: rgba(255,255,255,0.1);    /* nền glass */
+//   backdrop-filter: blur(8px);
+//   -webkit-backdrop-filter: blur(8px);
+//   border: 1px solid rgba(255,255,255,0.18);
+//   box-shadow: 0 6px 30px rgba(0,0,0,0.12);
+//   align-items: center;
+//   list-style: none;
+//   margin: 0;                     /* tránh margin mặc định của ul */
+// }
+
+/* các item giữ spacing bình thường */
+ul.pagination .page-item {
+  margin: 0.2rem;
+}
+
+/* override trực tiếp page-link của bootstrap */
+ul.pagination .page-link {
+  background: transparent !important;
+  border: none !important;
+  color: inherit; /* thừa hưởng màu chữ từ parent nếu cần */
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.6rem;
+  min-width: 36px;
+  text-align: center;
+}
+
+/* active button nổi bật hơn */
+ul.pagination .page-item.active .page-link {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #0b6623; /* chỉnh màu active */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* disabled nhìn mờ */
+ul.pagination .page-item.disabled .page-link {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* hover từng nút */
+ul.pagination .page-item .page-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #056a21; /* màu chữ khi hover */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}

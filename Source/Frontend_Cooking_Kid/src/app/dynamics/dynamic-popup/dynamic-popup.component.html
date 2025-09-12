@@ -6,7 +6,11 @@
     <h3 class="my-2">{{ form.titleForm }}</h3>
     <form #myForm="ngForm" [formGroup]="dynamicFormGroup">
       <!-- Master -->
-      <div [class]="form.classForm + 'glass'" [style]="form.style">
+      <div
+        class="row my-2 g-3 glass"
+        [class]="form.classForm"
+        [style]="form.style"
+      >
         <ng-container *ngFor="let field of form?.fieldControls">
           <!-- text -->
           <div
@@ -17,13 +21,13 @@
             "
             [class]="field.class"
           >
-            <label Class="form-label">{{ field.label }}</label>
-            <input
+            <app-input
+              classInput="form-control"
+              classLabel="form-label"
               [formControlName]="field.name"
-              class="form-control"
-              [placeholder]="field.placeHolder"
-              [type]="field.type"
-            />
+              [label]="field.label"
+              [placeHolder]="field.placeHolder"
+            ></app-input>
             <small
               class="text-danger"
               *ngIf="
@@ -34,20 +38,19 @@
             >
           </div>
           <!-- select -->
-          <div *ngIf="field.type === 'select'" [class]="field.class">
-            <label Class="form-label">{{ field.label }}</label>
-            <select
-              class="form-select"
-              formControlName="{{ field.name }}"
-              aria-label="Default select example"
-            >
-              <div style="border-radius: 1rem">
-                <option selected value="">Choose...</option>
-                <ng-container *ngFor="let option of field.options">
-                  <option [value]="option.id">{{ option.value }}</option>
-                </ng-container>
-              </div>
-            </select>
+          <div
+            *ngIf="field.type === 'select'"
+            [class]="field.class"
+            style="text-align: center"
+          >
+            <app-select
+              [label]="field.label"
+              [options]="field.options || []"
+              classLabel="form-label"
+              classSelect="form-select"
+              classSelect="form-select"
+              [formControlName]="field.name"
+            ></app-select>
             <small
               class="text-danger"
               *ngIf="
@@ -59,20 +62,15 @@
           </div>
           <!-- Radio -->
           <div *ngIf="field.type === 'radio'" [class]="field.class">
-            <label Class="form-label">{{ field.label }}</label>
-            <ng-container *ngFor="let option of field.radioOptions">
-              <div class="form-check">
-                <input
-                  formControlName="{{ field.name }}"
-                  [value]="option"
-                  class="form-check-input"
-                  type="radio"
-                />
-                <label class="form-check-lable" [for]="field.name">
-                  {{ option }}
-                </label>
-              </div>
-            </ng-container>
+            <app-radio
+              *ngIf="field.type === 'radio'"
+              [formControlName]="field.name"
+              [label]="field.label"
+              [options]="field.radioOptions"
+              classLabel="form-label"
+              [for]="field.name"
+            ></app-radio>
+
             <small
               class="text-danger"
               *ngIf="
@@ -87,34 +85,30 @@
 
       <ng-container *ngIf="form.detailForms && form.detailForms.length > 0">
         <!-- button change detail -->
-        <div
-          class="d-flex justify-content-start m-2 px-3 glass"
-          style="overflow-x: auto; white-space: nowrap; border-radius: 3rem"
-        >
-          <div class="" style="display: inline-flex">
-            <button
-              *ngFor="let detailForm of form.detailForms; let i = index"
-              type="button"
-              class="button-glass"
-              [ngClass]="{
-                'btn-primary': activeDetailIndex === i,
+        <app-action-box class="glass my-2">
+          <ng-container
+            *ngFor="let detailForm of form.detailForms; let i = index"
+          >
+            <app-button
+              variant="btn-glass"
+              [customClass]="{
                 'btn-outline-primary': activeDetailIndex !== i,
-                'active-tab': activeDetailIndex === i
+                active: activeDetailIndex === i
               }"
-              (click)="setActiveDetail(i)"
-            >
-              {{ detailForm.titleForm }}
-            </button>
-          </div>
-        </div>
+              (onClick)="setActiveDetail(i)"
+              [label]="detailForm.titleForm"
+            ></app-button>
+          </ng-container>
+        </app-action-box>
 
         <!-- Detail Forms -->
         <ng-container
           *ngFor="let detailForm of form.detailForms; let i = index"
         >
-          <div *ngIf="activeDetailIndex === i">
+          <ng-container *ngIf="activeDetailIndex === i">
             <table
-              [class]="detailForm.classForm + ' glass'"
+              [class]="detailForm.classForm"
+              class="table table-striped table-bordered glass glass-table"
               [style]="detailForm.style"
             >
               <thead>
@@ -136,6 +130,7 @@
                   dynamicFormGroup.get(detailForm.tableName)
                 "
                 [formArrayName]="detailForm.tableName"
+                class="scroll-hidden"
               >
                 <tr
                   *ngFor="
@@ -162,59 +157,81 @@
                       }}
                     </small>
                   </td>
-                  <td
-                    style="
-                      text-align: center;
-                      padding: 0.25rem;
-                      vertical-align: middle;
-                    "
-                  >
-                    <div
-                      class="d-flex justify-content-center gap-2"
-                      style="height: 100%; align-items: center"
-                    >
+                  <td>
+                    <div class="td-action">
                       <ng-container
                         *ngFor="let button of detailForm.buttonControls"
                       >
-                        <button
+                        <app-button
+                          variant="btn-icon"
                           [type]="button.type"
-                          class="btn-icon"
+                          [ngClass]="button.name"
                           [style]="button.style"
-                          (click)="
-                            handelForm(false);
+                          [icon]="button.class"
+                          (onClick)="
+                            handelMasterForm(false);
                             invokeAction(button.click, detailForm, rowIndex)
                           "
                         >
-                          <i
-                            [class]="button.class || ''"
-                            [ngClass]="button.name || ''"
-                          >
-                            {{ button.label }}
-                          </i>
-                        </button>
+                        </app-button>
                       </ng-container>
                     </div>
                   </td>
                 </tr>
               </tbody>
+              <tfoot>
+                <app-pagination
+                  [classNav]="'glass'"
+                  [classUl]="'glass'"
+                  [currentPage]="currentPage"
+                  [totalPages]="totalPages"
+                  (pageChange)="onPageChange($event)"
+                >
+                </app-pagination>
+              </tfoot>
             </table>
-          </div>
+          </ng-container>
         </ng-container>
       </ng-container>
 
       <!-- button master -->
       <div class="d-flex justify-content-end gap-2 m-3">
+        <app-button
+          variant="btn-glass"
+          type="button"
+          class="custom-btn"
+          [style]="
+            'color: white; background-color: blue !important; min-width: 5rem'
+          "
+          icon="fas fa-rotate-left"
+          label="Reset"
+          (onClick)="handelMasterForm(true); onReset(null, null)"
+        >
+        </app-button>
+        <app-button
+          variant="btn-glass"
+          type="submit"
+          class="custom-btn"
+          [style]="
+            'color: white; background-color: green !important ; min-width: 5rem'
+          "
+          icon="fas fa-paper-plane"
+          label="Save"
+          (onClick)="handelMasterForm(true); onSubmit()"
+        >
+        </app-button>
         <ng-container *ngFor="let button of form.buttonControls">
-          <button
+          <app-button
+            variant="btn-glass"
             [type]="button.type"
-            class="btn-icon custom-btn"
+            class="custom-btn"
             [style]="button.style"
-            (click)="handelForm(true); invokeAction(button.click)"
+            [icon]="button.class"
+            [label]="button.label"
+            [ngClass]="button.name"
+            (onClick)="handelMasterForm(true); invokeAction(button.click)"
           >
-            <i [class]="button.class || ''" [ngClass]="button.name || ''">
-              {{ button.label }}
-            </i>
-          </button>
+          </app-button>
         </ng-container>
       </div>
     </form>

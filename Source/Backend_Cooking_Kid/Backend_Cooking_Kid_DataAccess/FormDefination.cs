@@ -8,7 +8,6 @@ namespace Backend_Cooking_Kid_DataAccess
         public string VCId { get; set; } = string.Empty;
         public string VCDate { get; set; } = string.Empty;
         public IForm? Form { get; set; }
-        //public List<IForm>? ListForm { get; set; }
     }
     public class IForm
     {

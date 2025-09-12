@@ -12,6 +12,8 @@ export interface IForm {
   classForm?: string;
   style?: string;
   tableName?: string;
+  primarykey?: string[];
+  primarykeyvalue?: { [key: string]: string | null };
   buttonControls: IButtonControl[];
   fieldControls: IFieldControl[];
   detailForms: IForm[];
@@ -54,7 +56,7 @@ export interface IValidator {
   pattern?: string;
   message?: string;
 }
-interface IOption {
+export interface IOption {
   id?: number | string;
   value?: string;
 }

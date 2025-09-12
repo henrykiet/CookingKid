@@ -38,6 +38,31 @@ export class DynamicService {
       );
   }
 
+  handleMetadataForm(
+    metadataForm: IMetadataForm | null
+  ): Observable<IMetadataForm | null> {
+    return this.http
+      .post<APIResponse<IMetadataForm>>(`${this.apiUrl}/form`, metadataForm)
+      .pipe(
+        map((response) => {
+          if (response.success) {
+            localStorage.setItem(
+              'metadataConfig',
+              JSON.stringify(response.data)
+            );
+            localStorage.setItem(
+              'formConfig',
+              JSON.stringify(response.data.form)
+            );
+            this.metadataConfig = response.data;
+            this.formConfig = response.data.form ?? null;
+            return response.data;
+          } else {
+            return null;
+          }
+        })
+      );
+  }
   //#region old
   // getDynamicForm(config: IForm): IForm | null {
   //   if (isPlatformBrowser(this.platformId)) {

@@ -1,6 +1,6 @@
 {
   "controller": "customer",
-  "action": "get-list",
+  "action": "update",
   "vCId": "",
   "vCDate": "",
   "form": {
@@ -10,24 +10,6 @@
     "style": "border-radius: 1rem; overflow:hidden; border: 1px solid #dee2e6; padding: 0.5rem; margin-top: 0.5rem; background: rgba(255, 255, 255, 0.2);",
     "tableName": "customer",
     "primaryKey": [ "customer_id" ],
-    "ButtonControls": [
-      {
-        "name": "reset",
-        "label": "",
-        "type": "button",
-        "class": "fas fa-rotate-left",
-        "style":  "color:blue",
-        "click": "onReset"
-      },
-      {
-        "name": "submit",
-        "label": "",
-        "type": "submit",
-        "class": "fas fa-paper-plane",
-        "style": "",
-        "click": "onSubmit"
-      }
-    ],
     "fieldControls": [
       {
         "name": "customer_id",
@@ -339,20 +321,6 @@
           }
         ]
       }
-    ],
-
-    "initialDatas": [
-      {
-        "customer_id": "CUS001",
-        "firstName": "ALL",
-        "lastName": "OK"
-      },
-      {
-        "customer_id": "CUS002",
-        "firstName": "OK",
-        "lastName": "OK1"
-      }
-
     ]
 
   },

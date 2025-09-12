@@ -1,4 +1,5 @@
-﻿using Backend_Cooking_Kid_BusinessLogic.Services;
+﻿using Backend_Cooking_Kid_BusinessLogic.DTOs.Requests;
+using Backend_Cooking_Kid_BusinessLogic.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -14,10 +15,11 @@ namespace Backend_Cooking_kid_API.Controllers
             _dataService = dataService;
         }
 
-        [HttpGet("form")]
-        public async Task<IActionResult> GetFormMetadata()
+
+        [HttpPost("form")]
+        public async Task<IActionResult> FormMetadata([FromBody] MetadataRequest response)
         {
-            var result = await _dataService.GetFormMetadataAsync();
+            var result = await _dataService.GetFormMetadataAsync(response);
             return Ok(result);
         }
     }
