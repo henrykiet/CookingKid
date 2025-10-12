@@ -1,12 +1,12 @@
 <div
   class="sidebar"
   [ngClass]="{
-    'sidebar-collapsed': collapsed
+    'sidebar-collapsed': !collapsed
   }"
 >
   <div class="logo-container">
-    <button class="logo" (click)="toggleCollapse()">K</button>
-    <div class="logo-text" *ngIf="collapsed">
+    <button class="logo" (click)="openSidebar()">K</button>
+    <div class="logo-text" *ngIf="!collapsed">
       <a href="/" class="a-logo" style="text-decoration: none; color: #fff">
         <i class="">icon</i>
         <span>Kid</span>
@@ -25,7 +25,9 @@
         [routerLinkActiveOptions]="{ exact: true }"
       >
         <i class="sidebar-nav-icon" [class]="item.icon"></i>
-        <span class="sidebar-nav-text" *ngIf="collapsed">{{ item.label }}</span>
+        <span class="sidebar-nav-text" *ngIf="!collapsed">{{
+          item.label
+        }}</span>
       </a>
       <!-- danh sách bảng con -->
       <ul class="sidebar-subnav" *ngIf="item.expanded">
@@ -48,8 +50,8 @@
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
           >
-            <!-- <i class="sidebar-nav-icon" [ngClass]="children.icon"></i> -->
-            <span class="sidebar-nav-text" *ngIf="collapsed">{{
+            <i class="sidebar-nav-icon" [ngClass]="children.icon"></i>
+            <span class="sidebar-nav-text" *ngIf="!collapsed">{{
               children.label
             }}</span>
           </a>

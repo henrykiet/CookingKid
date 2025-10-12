@@ -7,18 +7,14 @@
     <form #myForm="ngForm" [formGroup]="dynamicFormGroup">
       <!-- Master -->
       <div
-        class="row my-2 g-3 glass"
+        class="row my-2 g-2 pb-2 px-2 glass"
         [class]="form.classForm"
         [style]="form.style"
       >
         <ng-container *ngFor="let field of form?.fieldControls">
           <!-- text -->
           <div
-            *ngIf="
-              ['text', 'email', 'password', 'number', 'date'].includes(
-                field.type
-              )
-            "
+            *ngIf="['text', 'email', 'password', 'number'].includes(field.type)"
             [class]="field.class"
           >
             <app-input
@@ -38,18 +34,14 @@
             >
           </div>
           <!-- select -->
-          <div
-            *ngIf="field.type === 'select'"
-            [class]="field.class"
-            style="text-align: center"
-          >
+          <div *ngIf="field.type === 'select'" [class]="field.class">
             <app-select
               [label]="field.label"
               [options]="field.options || []"
               classLabel="form-label"
               classSelect="form-select"
-              classSelect="form-select"
               [formControlName]="field.name"
+              [placeHolder]="field.value"
             ></app-select>
             <small
               class="text-danger"
@@ -71,6 +63,28 @@
               [for]="field.name"
             ></app-radio>
 
+            <small
+              class="text-danger"
+              *ngIf="
+                dynamicFormGroup.get(field.name)?.invalid &&
+                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
+              "
+              >{{ getValidationErrors(field.name, field.validators) }}</small
+            >
+          </div>
+          <!-- Date -->
+          <div *ngIf="field.type === 'date'" [class]="field.class">
+            <label [for]="field.name" class="form-label">{{
+              field.label
+            }}</label>
+
+            <input
+              [type]="field.type"
+              [id]="field.name"
+              [name]="field.name"
+              [formControlName]="field.name"
+              class="form-control"
+            />
             <small
               class="text-danger"
               *ngIf="
@@ -179,7 +193,7 @@
                   </td>
                 </tr>
               </tbody>
-              <tfoot>
+              <!-- <tfoot>
                 <app-pagination
                   [classNav]="'glass'"
                   [classUl]="'glass'"
@@ -188,7 +202,7 @@
                   (pageChange)="onPageChange($event)"
                 >
                 </app-pagination>
-              </tfoot>
+              </tfoot> -->
             </table>
           </ng-container>
         </ng-container>

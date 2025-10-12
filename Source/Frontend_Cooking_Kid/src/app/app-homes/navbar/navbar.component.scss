@@ -1,13 +1,13 @@
 .navbar {
-  background: #263238;
+  background: rgb(114, 172, 114);
   transition: all 0.5s ease;
   height: 4rem;
   top: 0;
-  z-index: 0;
+  z-index: 999;
   border-bottom-right-radius: 4px;
   box-shadow: 0rem 0 0.65rem 0 #8690a3;
   position: sticky;
-  
+
   .header {
     align-items: center;
     order: 2;
@@ -27,48 +27,50 @@
 
     .header-center {
       justify-content: center;
-      flex: 1;//chiếm giữa
+      flex: 1; //chiếm giữa
       text-align: center;
       h2 {
         font-size: 1.5rem;
         font-weight: 600;
-        color: red;
+        color: white;
         margin: 0;
       }
     }
 
     .header-right {
       justify-content: flex-end;
-    
+
       .btn-header-user {
         min-width: 180px;
         position: relative;
         align-items: center;
         justify-content: center;
         padding: 0.5rem 1rem;
-        background: #263238;
-        color: #fff;
+        margin-right: 1rem;
+        background-color: rgba(169, 169, 169, 0);
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 400;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         transition: all 0.3s ease;
-        
+
         .dropdown-user-menu {
           position: absolute;
           top: 100%;
           right: 0;
-          background: #fff;
-          color: #000;
-          border-radius: 6px;
-          margin: 0.3rem 0 0 0;
-          padding: 0.5rem 0;
-          z-index: 9999;
+          color: rgba(255, 255, 255, 0.8);
+          margin: 1rem 0 0 0;
+          padding: 0.5rem 0.3rem;
+          z-index: 999;
           min-width: 180px;
-          margin: 0;
           list-style: none;
-          border: 1px solid #ddd;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-          
+          background-color: rgba(169, 169, 169, 0);
+          border-radius: 2rem;
+          /* Áp dụng hiệu ứng mờ */
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           li {
             padding: 0.5rem 2rem;
             display: flex;
@@ -82,19 +84,21 @@
               flex: 1;
             }
           }
-          
+
           li:hover {
             border-radius: 2rem;
-            background: #f5f5f5;
+            background-color: transparent;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: rgba(165, 42, 42, 1);
           }
         }
 
         &:not(.menu-open):hover {
-          color: red;
+          color: rgba(165, 42, 42, 1);
         }
-        
+
         &.menu-open {
-          background: #263238;
+          background: rgba(169, 169, 169, 0);
         }
       }
     }

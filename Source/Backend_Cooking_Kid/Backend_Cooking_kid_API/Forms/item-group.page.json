@@ -1,0 +1,68 @@
+{
+  "controller": "item-group",
+  "action": "list",
+  "vCId": "",
+  "vCDate": "",
+  "form": {
+      "titleForm": "Quản lý Nhóm Sản phẩm",
+      "tableName": "itemGroups",
+      "primaryKey": [ "item_group_id" ],
+      "typeForm": "master",
+      "classForm": "",
+      "style": "",
+      "ButtonControls": [],
+      "fieldControls": [
+        {
+          "name": "item_group_id",
+          "label": "Mã Nhóm",
+          "type": "text",
+          "placeHolder": "Input Group ID",
+          "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+          "isReadOnly": null,
+          "isHidden": null,
+          "validators": [
+            {
+              "validatorName": "required",
+              "required": true,
+              "message": "*Mã nhóm là bắt buộc"
+            }
+          ]
+        },
+        {
+          "name": "group_name",
+          "label": "Tên Nhóm",
+          "type": "text",
+          "placeHolder": "Input Group Name",
+          "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+          "validators": [
+            {
+              "validatorName": "required",
+              "required": true,
+              "message": "*Tên nhóm là bắt buộc"
+            }
+          ]
+        },
+        {
+          "name": "description",
+          "label": "Mô tả",
+          "type": "textarea",
+          "placeHolder": "Input Description",
+          "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+          "validators": []
+        }
+      ],
+    "detailForms": [
+    ],
+    "initialDatas": [
+    ]
+  },
+  "file": {
+    "title": "Tệp đính kèm",
+    "type": "file-attachment"
+  },
+  "dataProcessing": {
+    "actions": {
+      "post": []
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<div class="glass scroll-hidden" style="margin-top: 0.5rem">
+  <div class="table-wrapper scroll-hidden">
+    <table #table class="table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th *ngFor="let head of thead">{{ head.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of tbody">
+          <td>
+            <div class="td-action">
+              <app-button
+                variant="btn-icon"
+                label=""
+                icon="fas fa-pen"
+                style="color: blue"
+                styleIcon="font-size: 16px"
+                (onClick)="onchangeUpdate(row)"
+              ></app-button>
+              <app-button
+                variant="btn-icon"
+                label=""
+                icon="fas fa-trash"
+                style="color: red"
+                styleIcon="font-size: 16px"
+                (onClick)="onchangeDelete(row)"
+              ></app-button>
+            </div>
+          </td>
+          <td *ngFor="let head of thead">{{ row[head.name] }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-wrapper">
+      <app-pagination
+        [classNav]="''"
+        [classUl]="''"
+        [styleNav]="'background: rgb(192, 241, 192);'"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        (pageChange)="onPageChange($event)"
+      >
+      </app-pagination>
+    </div>
+  </div>
+</div>

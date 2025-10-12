@@ -15,6 +15,7 @@ import { Route, Router } from '@angular/router';
 import { ButtonComponent } from '../../templates/button/button.component';
 import { ActionBoxComponent } from '../../templates/boxs/action-box/action-box.component';
 import { PaginationComponent } from '../../templates/pagination/pagination.component';
+import { TableComponent } from '../../templates/table/table.component';
 
 @Component({
   selector: 'app-dynamic-grid',
@@ -25,25 +26,22 @@ import { PaginationComponent } from '../../templates/pagination/pagination.compo
     ReactiveFormsModule,
     ActionBoxComponent,
     ButtonComponent,
-    PaginationComponent,
+    TableComponent,
   ],
   templateUrl: './dynamic-grid.component.html',
   styleUrl: './dynamic-grid.component.scss',
 })
 export class DynamicGridComponent implements OnInit {
-  currentPage: number = 1;
   @Input({ required: true }) metaform: IMetadataForm | null = null;
+  @Input() row: any = null;
   loading: boolean = false;
   fb = inject(FormBuilder);
   dynamicFormGroup: FormGroup = this.fb.group({}, { updateOn: 'submit' });
-  totalPages: number = 10;
   constructor(private dynamicService: DynamicService, private router: Router) {}
   ngOnInit(): void {
     this.getGridForm();
   }
-  onPageChange($event: number) {
-    throw new Error('Method not implemented.');
-  }
+
   getGridForm(): void {
     this.loading = true;
     this.dynamicService.handleMetadataForm(this.metaform).subscribe({
@@ -64,19 +62,44 @@ export class DynamicGridComponent implements OnInit {
   }
 
   handleDelete() {}
-  handleUpdate(row: any): void {
+  handleUpdate(row: any, action: string): void {
     if (this.metaform != null && this.metaform.form != null) {
-      this.metaform!.action = 'update';
+      this.metaform!.action = action;
       // Build giá trị PK từ danh sách primarykey
       const pkValue: { [key: string]: string | null } = {};
-      this.metaform.form.primarykey?.forEach((key) => {
+      const normalizedRow: { [key: string]: any } = {};
+      for (const key in row) {
+        if (Object.prototype.hasOwnProperty.call(row, key)) {
+          normalizedRow[key.toLowerCase()] = row[key];
+        }
+      }
+      // Khóa chính trong metadata là 'primaryKey'
+      this.metaform.form.primaryKey?.forEach((key) => {
+        // 2. SỬ DỤNG KEY (Vốn đã là chữ thường) ĐỂ TRA CỨU TRONG normalizedRow
+        const normalizedKey = key.toLowerCase();
+
         pkValue[key] =
-          row[key] !== undefined && row[key] !== null ? String(row[key]) : null;
+          normalizedRow[normalizedKey] !== undefined &&
+          normalizedRow[normalizedKey] !== null
+            ? String(normalizedRow[normalizedKey])
+            : null;
       });
-      // Gán vào form
-      this.metaform.form.primarykeyvalue = pkValue;
-      localStorage.setItem('metadataConfig', JSON.stringify(this.metaform));
-      this.router.navigate([`${this.router.url}/popup`]);
+      this.metaform.pkValue = pkValue;
+      // call api get update form
+      this.dynamicService.handleMetadataForm(this.metaform).subscribe({
+        next: (res) => {
+          if (res && res.form) {
+            // Gán vào form
+            this.metaform!.form = res.form;
+            console.log('metaform form for update:', this.metaform);
+            localStorage.setItem(
+              'metadataConfig',
+              JSON.stringify(this.metaform)
+            );
+            this.router.navigate([`${this.router.url}/popup`]);
+          }
+        },
+      });
     } else {
       //hiển thị không chuyển trang đucojw do thiếu dữ liệu
     }

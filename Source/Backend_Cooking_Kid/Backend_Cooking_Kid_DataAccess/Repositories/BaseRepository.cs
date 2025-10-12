@@ -10,16 +10,26 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
     public interface IBaseRepository<T> where T : class
     {
         //Base
+        /// <summary>
+        /// Get all value of table
+        /// </summary>
+        /// <param name="tableName">table name</param>
+        /// <param name="page">page quantity</param>
+        /// <param name="pageSize">page size</param>
+        /// <returns>All value of table or value of page size</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Exception"></exception>
         Task<List<dynamic>> GetAllAsync(string tableName, int? page, int? pageSize);
+        Task<List<dynamic>> GetAllAsync(string tableName, Dictionary<string, string>? pkValue, int? page, int? pageSize);
         Task<dynamic?> GetByIdAsync(object id, string tableName, string? keyName = null);
-        Task<int> UpsertAsync(DataTable table, JsonDefination sqlJsonDefination);
+        Task<int> UpsertAsync(DataTable table, ModelDefination sqlJsonDefination);
 
         //External
-        DataTable CheckExcelColumnMapping(DataTable oldDataTable, JsonDefination.ExcelIntegrationMap excelColumn);
+        DataTable CheckExcelColumnMapping(DataTable oldDataTable, ModelDefination.ExcelIntegrationMap excelColumn);
 
         //get Template
-        Task<JsonDefination> GetTemplateModelAsync(string tableName);
-        Task<List<JsonDefination>> GetAllTemplateModelAsync();
+        Task<ModelDefination> GetTemplateModelAsync(string tableName);
+        Task<List<ModelDefination>> GetAllTemplateModelAsync();
         Task<FormDefination> GetTemplateMetadataAsync(string controller);
     }
     public class BaseRepository<T> : IBaseRepository<T> where T : class
@@ -34,15 +44,6 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
             _dbSet = _context.Set<T>();
         }
         #region Base
-        /// <summary>
-        /// Get all value of table
-        /// </summary>
-        /// <param name="tableName">table name</param>
-        /// <param name="page">page quantity</param>
-        /// <param name="pageSize">page size</param>
-        /// <returns>All value of table or value of page size</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="Exception"></exception>
         public async Task<List<dynamic>> GetAllAsync(string tableName, int? page, int? pageSize)
         {
             if (string.IsNullOrWhiteSpace(tableName))
@@ -51,12 +52,14 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
             if (pageSize <= 0) pageSize = 100;
             try
             {
-                if (_dbConnect.State != ConnectionState.Open)
-                    _dbConnect.Open();
+                var connectionString = _context.Database.GetConnectionString(); // lấy từ EF Core
+                using var conn = new SqlConnection(connectionString);
+                await conn.OpenAsync();
+
                 var sql = "";
                 // Lấy tổng số dòng
                 string countSql = $"SELECT COUNT(*) FROM [{tableName}]";
-                int totalCount = await _dbConnect.ExecuteScalarAsync<int>(countSql);
+                int totalCount = await conn.ExecuteScalarAsync<int>(countSql);
                 if (page != null && pageSize != null && page >= 0 && pageSize >= 0)
                 {
                     // Lấy dữ liệu trang hiện tại
@@ -72,7 +75,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
                 {
                     sql = $"SELECT * FROM [{tableName}]";
                 }
-                var items = await _dbConnect.QueryAsync(sql);
+                var items = await conn.QueryAsync(sql);
                 return items.ToList();
             }
             catch (Exception ex)
@@ -80,6 +83,58 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
                 throw new Exception($"Exception when fetching paged data from table '{tableName}'", ex);
             }
         }
+
+        public async Task<List<dynamic>> GetAllAsync(string tableName, Dictionary<string, string>? pkValue, int? page, int? pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+                throw new ArgumentNullException(nameof(tableName));
+            if (pkValue == null)
+                throw new ArgumentNullException(nameof(pkValue));
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 100;
+            try
+            {
+                var connectionString = _context.Database.GetConnectionString(); // lấy từ EF Core
+                using var conn = new SqlConnection(connectionString);
+                await conn.OpenAsync();
+                //lấy câu lệnh where
+                var conditions = new List<string>();
+                foreach (var pkVal in pkValue)
+                {
+                    var condition = $"[{pkVal.Key}] = '{pkVal.Value}'";
+                    // Thêm điều kiện này vào danh sách
+                    conditions.Add(condition);
+                }
+                string whereClause = conditions.Count > 0 ? "WHERE " + string.Join(" AND ", conditions) : "";
+                var sql = "";
+                // Lấy tổng số dòng
+                string countSql = $"SELECT COUNT(*) FROM [{tableName}]";
+                int totalCount = await conn.ExecuteScalarAsync<int>(countSql);
+                if (page != null && pageSize != null && page >= 0 && pageSize >= 0)
+                {
+                    // Lấy dữ liệu trang hiện tại
+                    int offset = ((int)page - 1) * (int)pageSize;
+                    sql = $@"
+								SELECT * 
+								FROM [{tableName}] 
+                                {whereClause}
+								ORDER BY (SELECT NULL) -- Tránh lỗi nếu không có cột cụ thể
+								OFFSET {offset} ROWS 
+								FETCH NEXT {pageSize} ROWS ONLY";
+                }
+                else
+                {
+                    sql = $"SELECT * FROM [{tableName}] {whereClause}";
+                }
+                var items = await conn.QueryAsync(sql);
+                return items.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Exception when fetching paged data from table '{tableName}'", ex);
+            }
+        }
+
 
         /// <summary>
         /// Get by id of table
@@ -144,7 +199,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <returns>number row if success or list errors</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ExceptionFormat"></exception>
-        public async Task<int> UpsertAsync(DataTable table, JsonDefination sqlJsonDefination)
+        public async Task<int> UpsertAsync(DataTable table, ModelDefination sqlJsonDefination)
         {
             if (sqlJsonDefination == null) throw new ArgumentNullException(nameof(sqlJsonDefination));
             var tableName = sqlJsonDefination.ExcelIntegration?.SheetName ?? sqlJsonDefination.Model;
@@ -257,7 +312,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="oldDataTable"></param>
         /// <param name="excelColumn"></param>
         /// <returns>New Table</returns>
-        public DataTable CheckExcelColumnMapping(DataTable oldDataTable, JsonDefination.ExcelIntegrationMap excelColumn)
+        public DataTable CheckExcelColumnMapping(DataTable oldDataTable, ModelDefination.ExcelIntegrationMap excelColumn)
         {
             var newDataTable = new DataTable();
             var missingColumns = new List<string>();
@@ -333,7 +388,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="tableName"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public async Task<JsonDefination> GetTemplateModelAsync(string tableName)
+        public async Task<ModelDefination> GetTemplateModelAsync(string tableName)
         {
             var folderPath = Path.Combine(AppContext.BaseDirectory, "Entities");
             if (!Directory.Exists(folderPath))
@@ -345,7 +400,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
             if (matchedFile == null)
                 throw new ExceptionFormat($"JSON file not match: {expectedFileName}.");
             var jsonContent = await File.ReadAllTextAsync(matchedFile);
-            var template = JsonConvert.DeserializeObject<JsonDefination>(jsonContent);
+            var template = JsonConvert.DeserializeObject<ModelDefination>(jsonContent);
             return template!;
         }
 
@@ -374,12 +429,12 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
                 if (matchedFile == null)
                     throw new ExceptionFormat($"JSON file not match: {expectedFileName}.");
                 var jsonContent = await File.ReadAllTextAsync(matchedFile);
-                var template = JsonConvert.DeserializeObject<FormDefination>(jsonContent, 
+                var template = JsonConvert.DeserializeObject<FormDefination>(jsonContent,
                                                                      new JsonSerializerSettings
-                                                                      {
-                                                                        MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-                                                                        DateParseHandling = DateParseHandling.None
-                                                                      });
+                                                                     {
+                                                                         MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+                                                                         DateParseHandling = DateParseHandling.None
+                                                                     });
                 return template!;
             }
             catch (Exception ex)
@@ -393,9 +448,9 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// </summary>
         /// <returns>Danh sách SqlJsonDefination</returns>
         /// <exception cref="DirectoryNotFoundException">Nếu không tìm thấy thư mục schema</exception>
-        public async Task<List<JsonDefination>> GetAllTemplateModelAsync()
+        public async Task<List<ModelDefination>> GetAllTemplateModelAsync()
         {
-            var results = new List<JsonDefination>();
+            var results = new List<ModelDefination>();
             string folderPath = Path.Combine(AppContext.BaseDirectory, "Entities");
 
             if (!Directory.Exists(folderPath))
@@ -408,7 +463,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
                 try
                 {
                     var json = await File.ReadAllTextAsync(file);
-                    var def = JsonConvert.DeserializeObject<JsonDefination>(json);
+                    var def = JsonConvert.DeserializeObject<ModelDefination>(json);
                     if (def != null)
                     {
                         var fileName = Path.GetFileNameWithoutExtension(file); // ví dụ: DonHangJson
@@ -429,7 +484,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// </summary>
         /// <param name="schema"></param>
         /// <returns>List or one primary key</returns>
-        private List<string> GetPrimaryKeys(JsonDefination schema)
+        private List<string> GetPrimaryKeys(ModelDefination schema)
         {
             return schema.Schema.Fields
                 .Where(f => f.PrimaryKey == true)
@@ -445,7 +500,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="tempTableName"></param>
         /// <param name="sqlJsonDefination"></param>
         /// <returns></returns>
-        private string GenerateCreateTableScript(string tempTableName, JsonDefination sqlJsonDefination)
+        private string GenerateCreateTableScript(string tempTableName, ModelDefination sqlJsonDefination)
         {
             if (sqlJsonDefination?.Schema?.Fields == null || !sqlJsonDefination.Schema.Fields.Any())
                 throw new ArgumentException("Schema fields must be provided");
@@ -464,7 +519,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="sqlJsonDefination"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        private string GenerateMergeSqlFromTempTable(string tempTableName, JsonDefination sqlJsonDefination)
+        private string GenerateMergeSqlFromTempTable(string tempTableName, ModelDefination sqlJsonDefination)
         {
             // Lấy tên bảng chính
             string mainTable = sqlJsonDefination.ExcelIntegration?.SheetName ?? sqlJsonDefination.Model;
@@ -512,7 +567,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="tempTableName"></param>
         /// <param name="sqlDefination"></param>
         /// <returns></returns>
-        private string GenerateValidationQueryFromTempTable(string tempTableName, JsonDefination sqlDefination)
+        private string GenerateValidationQueryFromTempTable(string tempTableName, ModelDefination sqlDefination)
         {
             var caseWhenClauses = new List<string>();
 
@@ -564,7 +619,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <param name="sqlDefination"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private string GenerateValidationQueryByOpenJson(JsonDefination sqlDefination)
+        private string GenerateValidationQueryByOpenJson(ModelDefination sqlDefination)
         {
             var caseWhenClauses = new List<string>();
             var fields = new List<string>();
@@ -636,7 +691,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        private async Task ValidateEntityAsync(object entity, JsonDefination def)
+        private async Task ValidateEntityAsync(object entity, ModelDefination def)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
             if (def == null) throw new ArgumentNullException(nameof(def));
@@ -665,7 +720,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
         /// <returns></returns>
         private async Task<(bool isValid, List<string>? errors)> ValidateDatabaseCheck(
                                                                                     string tempTableName,
-                                                                                    JsonDefination sqlDefination,
+                                                                                    ModelDefination sqlDefination,
                                                                                     SqlConnection connection,
                                                                                     SqlTransaction transaction)
         {

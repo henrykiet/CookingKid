@@ -1,0 +1,192 @@
+{
+  "controller": "menus",
+  "action": "list",
+  "vCId": "",
+  "vCDate": "",
+  "form": {
+    "titleForm": "Menus",
+    "typeForm": "master",
+    "classForm": "row g-3",
+    "style": "border-radius: 1rem; overflow:hidden; border: 1px solid #dee2e6; padding: 0.5rem; margin-top: 0.5rem; background: rgba(255, 255, 255, 0.2);",
+    "tableName": "Menus",
+    "primaryKey": ["menu_id"],
+    "fieldControls": [
+      {
+        "name": "menu_id",
+        "label": "Menu ID",
+        "type": "text",
+        "placeHolder": "Auto identity",
+        "isReadOnly": true,
+        "validators": []
+      },
+      {
+        "name": "routeLink",
+        "label": "Route Link",
+        "type": "text",
+        "placeHolder": "Input route link",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Route Link is required"
+          }
+        ]
+      },
+      {
+        "name": "label",
+        "label": "Label",
+        "type": "text",
+        "placeHolder": "Input label",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Label is required"
+          }
+        ]
+      },
+      {
+        "name": "icon",
+        "label": "Icon",
+        "type": "text",
+        "placeHolder": "Input icon class",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Icon is required"
+          }
+        ]
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "select",
+        "options": [
+          { "id": "A", "value": "Active" },
+          { "id": "I", "value": "Inactive" }
+        ],
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Status is required"
+          }
+        ]
+      }
+    ],
+    "detailForms": [
+      {
+        "titleForm": "SubMenus",
+        "tableName": "SubMenus",
+        "primaryKey": ["menu_id", "line_nbr"],
+        "typeForm": "detail",
+        "classForm": "",
+        "style": "",
+        "ButtonControls": [
+          {
+            "name": "delete",
+            "label": "",
+            "type": "button",
+            "class": "fas fa-minus-circle",
+            "click": "removeDetailRow"
+          }
+        ],
+        "fieldControls": [
+          {
+            "name": "menu_id",
+            "label": "Menu ID",
+            "type": "text",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Menu ID is required"
+              }
+            ]
+          },
+          {
+            "name": "line_nbr",
+            "label": "Line",
+            "type": "number",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Line number is required"
+              }
+            ]
+          },
+          {
+            "name": "routeLink",
+            "label": "Route Link",
+            "type": "text",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Route Link is required"
+              }
+            ]
+          },
+          {
+            "name": "label",
+            "label": "Label",
+            "type": "text",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Label is required"
+              }
+            ]
+          },
+          {
+            "name": "icon",
+            "label": "Icon",
+            "type": "text",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Icon is required"
+              }
+            ]
+          },
+          {
+            "name": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              { "id": "A", "value": "Active" },
+              { "id": "I", "value": "Inactive" }
+            ],
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Status is required"
+              }
+            ]
+          }
+        ],
+        "initialDatas": [
+        ]
+      }
+    ]
+  },
+  "file": {
+    "title": "Tệp đính kèm",
+    "type": "file-attachment"
+  },
+  "dataProcessing": {
+    "actions": {
+      "post": []
+    }
+  }
+}

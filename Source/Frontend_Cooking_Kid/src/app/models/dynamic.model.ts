@@ -4,6 +4,7 @@ export interface IMetadataForm {
   vCId?: string;
   vCDate?: string;
   form?: IForm;
+  pkValue?: { [key: string]: string | null };
 }
 
 export interface IForm {
@@ -12,7 +13,7 @@ export interface IForm {
   classForm?: string;
   style?: string;
   tableName?: string;
-  primarykey?: string[];
+  primaryKey?: string[];
   primarykeyvalue?: { [key: string]: string | null };
   buttonControls: IButtonControl[];
   fieldControls: IFieldControl[];

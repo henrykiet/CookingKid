@@ -1,5 +1,5 @@
-<app-sidebar (onToggleSidebar)="onToggleSidebar($event)"></app-sidebar>
 <div class="body" [ngClass]="getBodyClass()">
+  <app-sidebar (onToggleSidebar)="onToggleSidebar($event)"></app-sidebar>
   <app-navbar></app-navbar>
   <div class="router-content scroll-hidden">
     <router-outlet></router-outlet>

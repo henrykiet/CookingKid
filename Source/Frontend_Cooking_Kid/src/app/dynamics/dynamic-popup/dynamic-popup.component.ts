@@ -8,15 +8,18 @@ import {
   Validators,
 } from '@angular/forms';
 import { DynamicService } from '../../services/dynamic.service';
-import { IForm, IMetadataForm, IValidator } from '../../models/dynamic.model';
+import {
+  IForm,
+  IMetadataForm,
+  IOption,
+  IValidator,
+} from '../../models/dynamic.model';
 import { CommonModule } from '@angular/common';
 import { ActionBoxComponent } from '../../templates/boxs/action-box/action-box.component';
 import { ButtonComponent } from '../../templates/button/button.component';
 import { InputComponent } from '../../templates/input/input.component';
 import { SelectComponent } from '../../templates/select/select.component';
 import { RadioComponent } from '../../templates/radio/radio.component';
-import { LeafWrapperComponent } from '../../templates/leaf-wrapper/leaf-wrapper.component';
-import { PaginationComponent } from '../../templates/pagination/pagination.component';
 
 @Component({
   selector: 'app-dynamic-popup',
@@ -29,17 +32,11 @@ import { PaginationComponent } from '../../templates/pagination/pagination.compo
     InputComponent,
     SelectComponent,
     RadioComponent,
-    PaginationComponent,
   ],
   templateUrl: './dynamic-popup.component.html',
   styleUrl: './dynamic-popup.component.scss',
 })
 export class DynamicPopupComponent {
-  currentPage: number = 1;
-  totalPages: number = 10;
-  onPageChange($event: number) {
-    throw new Error('Method not implemented.');
-  }
   @Input() form: IForm | null = null;
   metadataForm: IMetadataForm | null = null;
   loading: boolean = true;
@@ -54,50 +51,41 @@ export class DynamicPopupComponent {
   private isBrowser(): boolean {
     return typeof window !== 'undefined';
   }
+
   ngOnInit(): void {
     if (localStorage.getItem('metadataConfig')) {
       this.metadataForm = JSON.parse(localStorage.getItem('metadataConfig')!);
-      console.log('metadata', this.metadataForm);
-    }
-    if (this.form) {
-      this.validations();
-      this.loading = false;
-    }
-    // else if (this.isBrowser() && localStorage.getItem('formConfig')) {
-    //   console.log('lấy từ local');
-    //   this.form = JSON.parse(localStorage.getItem('formConfig')!);
-    //   this.validations();
-    //   this.loading = false;
-    // } else if (this.isBrowser() && localStorage.getItem('metadataConfig')) {
-    //   console.log('lấy từ meta');
-    //   this.form = this.dynamicService.formConfig;
-    //   this.validations();
-    //   this.loading = false;
-    // }
-    else if (this.isBrowser()) {
-      this.getPopupForm();
+      this.form = this.metadataForm?.form || null;
+      if (this.form) {
+        this.validations();
+        this.loading = false;
+      } else {
+        console.error('No Form config found in localStorage');
+      }
+    } else {
+      console.error('No Metadata Config found in localStorage');
     }
   }
 
-  getPopupForm(): void {
-    this.loading = true;
-    this.dynamicService.handleMetadataForm(this.metadataForm).subscribe({
-      next: (res) => {
-        if (res && res.form) {
-          this.form = res.form;
-          localStorage.setItem('metadataConfig', JSON.stringify(this.form));
-          this.validations();
-        } else {
-          console.error('No form configuration found');
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error loading form', err);
-        this.loading = false;
-      },
-    });
-  }
+  // getPopupForm(): void {
+  //   this.loading = true;
+  //   this.dynamicService.handleMetadataForm(this.metadataForm).subscribe({
+  //     next: (res) => {
+  //       if (res && res.form) {
+  //         this.form = res.form;
+  //         localStorage.setItem('metadataConfig', JSON.stringify(this.form));
+  //         this.validations();
+  //       } else {
+  //         console.error('No form configuration found');
+  //       }
+  //       this.loading = false;
+  //     },
+  //     error: (err) => {
+  //       console.error('Error loading form', err);
+  //       this.loading = false;
+  //     },
+  //   });
+  // }
 
   validations() {
     if (this.form?.fieldControls && this.form.fieldControls.length > 0) {
@@ -105,9 +93,56 @@ export class DynamicPopupComponent {
 
       //master
       if (this.form?.fieldControls?.length) {
+        const initialRecord = this.form.initialDatas[0];
         this.form.fieldControls.forEach((control) => {
-          formGroup[control.name] = [
-            control.value || '',
+          let value = initialRecord?.[control.name];
+          let fieldName = control.name;
+          if (control.type == 'date' && value) {
+            const dateString = String(value).split(' ')[0]; // Lấy phần ngày: "08/05/1991"
+            const parts = dateString.split('/');
+
+            if (parts.length === 3) {
+              // Giả sử: parts[0] là Ngày (08), parts[1] là Tháng (05), parts[2] là Năm (1991)
+              // Chuyển sang định dạng chuẩn YYYY-MM-DD
+              const day = parts[0].padStart(2, '0'); // 08
+              const month = parts[1].padStart(2, '0'); // 05
+              const year = parts[2]; // 1991
+
+              value = `${year}-${month}-${day}`; // Kết quả: "1991-05-08"
+            }
+          } else if (control.type == 'radio' && value) {
+            control.radioOptions?.forEach((radio) => {
+              const firstCharName = String(radio).charAt(0).toLowerCase();
+              const lowerValue = value.toLowerCase();
+              if (lowerValue == firstCharName) {
+                value = radio;
+              }
+            });
+          } else if (control.type == 'select') {
+            if (control.options && typeof value === 'string') {
+              // 2. Ép kiểu rõ ràng biến lặp `select` thành IOption
+              // Sử dụng for...of hoặc forEach với khai báo kiểu rõ ràng
+              for (const select of control.options as IOption[]) {
+                // 3. Đảm bảo select.id không phải undefined trước khi gọi String()
+                const idValue =
+                  select.id !== undefined ? String(select.id) : '';
+                const selectLower = idValue.toLowerCase();
+
+                const lowerValue = value.toLowerCase();
+
+                console.log('select', select.id, select.value);
+
+                // 4. Nếu tìm thấy, gán giá trị và THOÁT KHỎI VÒNG LẶP
+                if (selectLower == lowerValue) {
+                  value = select.value;
+                  // Nếu đây là hàm xử lý gán giá trị, bạn nên dùng return hoặc flag để dừng lại
+                  // break; // Bạn không thể dùng break trong forEach, nên dùng for...of hoặc .find()
+                }
+              }
+            }
+          }
+          formGroup[fieldName] = [
+            value || '',
             this.mapValidators(control.validators),
           ];
         });

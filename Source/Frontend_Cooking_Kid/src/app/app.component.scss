@@ -1,8 +1,7 @@
 .body {
   position: fixed;
-  width: calc(100% - 5rem);
+  width: 100%;
   height: 100vh;
-  margin-left: 5rem;
   position: fixed;
   z-index: 0;
   top: 0;
@@ -11,27 +10,37 @@
   background: #f4f7fa;
   padding-bottom: 4rem;
 
-  background: linear-gradient(to right, #00b09b, #96c93d);
+  background: linear-gradient(
+    to right,
+    rgba(0, 176, 155, 0.7),
+    rgba(150, 201, 61, 0.7)
+  );
 
   .router-content {
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    margin: 0 5rem;
+
+    // align-items: center;
     justify-content: flex-start;
-    width: 100%;
+    width: calc(100% - 5rem);
     height: 100%;
   }
 }
 
-.body-trimmed {
-  width: calc(100% - 16.5625rem);
-  margin-left: 16.5625rem;
-  // .router-content{
-  //   width: calc(100% - 16.5625rem);
-  //   height: 100%;
-  // }
-}
+// .body-trimmed {
+//   // .router-content {
+//   //   width: calc(100% - 16.5625rem);
+//   //   margin-left: 16.5625rem;
+//   //   height: 100%;
+//   // }
+//   // .top-navbar {
+//   //   width: calc(100% - 11.5625rem);
+//   //   margin-left: 11.5625rem;
+//   //   height: 4rem;
+//   // }
+// }
 
 .body-md-screen {
   width: calc(100% - 5rem);

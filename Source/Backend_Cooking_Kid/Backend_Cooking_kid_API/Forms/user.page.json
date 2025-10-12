@@ -1,6 +1,6 @@
 {
   "controller": "user",
-  "action": "get-list",
+  "action": "list",
   "vCId": "",
   "vCDate": "",
   "form": {
@@ -8,14 +8,14 @@
     "typeForm": "master",
     "classForm": "",
     "style": "",
-    "tableName": "customer",
-    "primaryKey": [ "customer_id" ],
+    "tableName": "users",
+    "primaryKey": [ "user_id" ],
     "fieldControls": [
       {
-        "name": "customer_id",
-        "label": "Mã khách hàng",
+        "name": "user_id",
+        "label": "ID User",
         "type": "text",
-        "placeHolder": "Input customer ID",
+        "placeHolder": "Input user ID",
         "class": "",
         "isReadOnly": null,
         "isHidden": null,
@@ -23,16 +23,16 @@
           {
             "validatorName": "required",
             "required": true,
-            "message": "*Customer ID is required"
+            "message": "*User ID is required"
           }
         ]
       },
       {
-        "name": "firstName",
+        "name": "first_name",
         "label": "First Name",
         "placeHolder": "Input First Name",
         "class": "col-md-6",
-        "value":  "DƯƠNG",
+        "value": "",
         "type": "text",
         "validators": [
           {
@@ -43,9 +43,9 @@
         ]
       },
       {
-        "name": "lastName",
+        "name": "last_name",
         "label": "Last Name",
-        "placeHolder": "",
+        "placeHolder": "Input your lastname",
         "class": "col-md-6",
         "type": "text",
         "validators": [
@@ -63,8 +63,8 @@
       },
       {
         "name": "email",
-        "label": "email",
-        "placeHolder": "",
+        "label": "Email",
+        "placeHolder": "Input email",
         "class": "col-md-6",
         "type": "email",
         "validators": [
@@ -82,8 +82,8 @@
       },
       {
         "name": "phone",
-        "label": "phone",
-        "placeHolder": "",
+        "label": "Phone",
+        "placeHolder": "Input your phone",
         "class": "col-md-4",
         "type": "number",
         "validators": [
@@ -99,13 +99,37 @@
           }
         ]
       },
+      //{
+      //  "name": "gender",
+      //  "label": "Gender",
+      //  "placeHolder": "Input your gender",
+      //  "class": "col-md-4",
+      //  "radioOptions": [ "Male", "Female" ],
+      //  "type": "radio",
+      //  "validators": [
+      //    {
+      //      "validatorName": "required",
+      //      "required": true,
+      //      "message": "*Gender is required"
+      //    }
+      //  ]
+      //},
       {
         "name": "gender",
-        "label": "gender",
-        "placeHolder": "",
+        "label": "Gender",
+        "placeHolder": "Input your Gender",
         "class": "col-md-4",
-        "radioOptions": [ "Male", "Female" ],
-        "type": "radio",
+        "options": [
+          {
+            "id": "F",
+            "value": "Female"
+          },
+          {
+            "id": "M",
+            "value": "Male"
+          }
+        ],
+        "type": "select",
         "validators": [
           {
             "validatorName": "required",
@@ -115,238 +139,179 @@
         ]
       },
       {
-        "name": "option",
-        "label": "package",
-        "placeHolder": "",
-        "class": "col-md-4",
-        "options": [
-          {
-            "id": "1",
-            "value": "Option 1"
-          },
-          {
-            "id": "2",
-            "value": "Option 2"
-          },
-          {
-            "id": "2",
-            "value": "Option 3"
-          }
-        ],
-        "type": "select",
-        "validators": [
-          {
-            "validatorName": "required",
-            "required": true,
-            "message": "*Option is required"
-          }
-        ]
-      },
-      {
-        "name": "birthDate",
+        "name": "birth_date",
         "label": "Birth of Date",
-        "placeHolder": "",
+        "placeHolder": "Choose your birthdate",
         "class": "col-md-4",
         "type": "date",
         "validators": [
           {
             "validatorName": "required",
             "required": true,
-            "message": "*Phone is required"
+            "message": "*Birthdate is required"
           }
         ]
       }
     ],
     "detailForms": [
-      {
-        "titleForm": "Chi tiết khách hàng",
-        "tableName": "customerDetail",
-        "primaryKey": [ "customer_detail_id" ],
-        "typeForm": "detail",
-        "classForm": "",
-        "style": "",
-        "ButtonControls": [
-          {
-            "name": "reset",
-            "label": "",
-            "type": "button",
-            "class": "fas fa-arrows-rotate",
-            "style": "",
-            "click": "onReset"
-          },
-          {
-            "name": "delete",
-            "label": "",
-            "type": "button",
-            "class": "fas fa-minus-circle",
-            "style": "",
-            "click": "removeDetailRow"
-          }
-        ],
-        "fieldControls": [
-          {
-            "name": "customer_id",
-            "label": "Mã khách hàng",
-            "type": "text",
-            "placeHolder": "Input customer ID",
-            "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
-            "isReadOnly": null,
-            "isHidden": null,
-            "validators": [
-              {
-                "validatorName": "required",
-                "required": true,
-                "message": "*Customer ID is required"
-              }
-            ]
-          },
-          {
-            "name": "firstName",
-            "label": "First Name",
-            "placeHolder": "Input First Name",
-            "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
-            "type": "text",
-            "validators": [
-              {
-                "validatorName": "required",
-                "required": true,
-                "message": "*First Name is required"
-              }
-            ]
-          },
-          {
-            "name": "lastName",
-            "label": "Last Name",
-            "placeHolder": "Input First Name",
-            "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
-            "type": "text",
-            "validators": [
-              {
-                "validatorName": "required",
-                "required": true,
-                "message": "*First Name is required"
-              }
-            ]
-          }
-        ],
-        "initialDatas": [
-          {
-            "customer_id": "CUS001",
-            "firstName": "Kiet"
-          },
-          {
-            "customer_id": "CUS002",
-            "firstName": "Kiet2"
-          },
-          {
-            "customer_id": "CUS003",
-            "firstName": "Kiet4"
-          },
-          {
-            "customer_id": "CUS003",
-            "firstName": "Kiet4"
-          }
-        ]
-      },
-      {
-        "titleForm": "Chi tiết khách hàng 1",
-        "tableName": "customerDetail1",
-        "primaryKey": [ "customer_detail_id" ],
-        "typeForm": "detail",
-        "classForm": "",
-        "style": "",
-        "ButtonControls": [
-          {
-            "name": "reset",
-            "type": "button",
-            "class": "fas fa-arrows-rotate",
-            "style": "",
-            "click": "onReset"
-          },
-          {
-            "name": "delete",
-            "type": "button",
-            "class": "fas fa-minus-circle",
-            "click": "removeDetailRow"
-          }
-        ],
-        "fieldControls": [
-          {
-            "name": "customer_id",
-            "label": "Mã khách hàng",
-            "type": "text",
-            "placeHolder": "Input customer ID",
-            "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
-            "isReadOnly": null,
-            "isHidden": null,
-            "validators": [
-              {
-                "validatorName": "required",
-                "required": true,
-                "message": "*Customer ID is required"
-              }
-            ]
-          },
-          {
-            "name": "lastName",
-            "label": "Last Name",
-            "placeHolder": "Input Last Name",
-            "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
-            "type": "text",
-            "validators": [
-              {
-                "validatorName": "required",
-                "required": true,
-                "message": "*Last Name is required"
-              }
-            ]
-          }
-        ],
-        "initialDatas": [
-          {
-            "customer_id": "CUS004",
-            "lastName": "TUAN"
-          },
-          {
-            "customer_id": "CUS003",
-            "lastName": "DUONG"
-          }
-        ]
-      }
+      //{
+      //  "titleForm": "Chi tiết khách hàng",
+      //  "tableName": "customerDetail",
+      //  "primaryKey": [ "customer_detail_id" ],
+      //  "typeForm": "detail",
+      //  "classForm": "",
+      //  "style": "",
+      //  "ButtonControls": [
+      //    {
+      //      "name": "reset",
+      //      "label": "",
+      //      "type": "button",
+      //      "class": "fas fa-arrows-rotate",
+      //      "style": "",
+      //      "click": "onReset"
+      //    },
+      //    {
+      //      "name": "delete",
+      //      "label": "",
+      //      "type": "button",
+      //      "class": "fas fa-minus-circle",
+      //      "style": "",
+      //      "click": "removeDetailRow"
+      //    }
+      //  ],
+      //  "fieldControls": [
+      //    {
+      //      "name": "customer_id",
+      //      "label": "Mã khách hàng",
+      //      "type": "text",
+      //      "placeHolder": "Input customer ID",
+      //      "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+      //      "isReadOnly": null,
+      //      "isHidden": null,
+      //      "validators": [
+      //        {
+      //          "validatorName": "required",
+      //          "required": true,
+      //          "message": "*Customer ID is required"
+      //        }
+      //      ]
+      //    },
+      //    {
+      //      "name": "firstName",
+      //      "label": "First Name",
+      //      "placeHolder": "Input First Name",
+      //      "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+      //      "type": "text",
+      //      "validators": [
+      //        {
+      //          "validatorName": "required",
+      //          "required": true,
+      //          "message": "*First Name is required"
+      //        }
+      //      ]
+      //    },
+      //    {
+      //      "name": "lastName",
+      //      "label": "Last Name",
+      //      "placeHolder": "Input First Name",
+      //      "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+      //      "type": "text",
+      //      "validators": [
+      //        {
+      //          "validatorName": "required",
+      //          "required": true,
+      //          "message": "*First Name is required"
+      //        }
+      //      ]
+      //    }
+      //  ],
+      //  "initialDatas": [
+      //    {
+      //      "customer_id": "CUS001",
+      //      "firstName": "Kiet"
+      //    },
+      //    {
+      //      "customer_id": "CUS002",
+      //      "firstName": "Kiet2"
+      //    },
+      //    {
+      //      "customer_id": "CUS003",
+      //      "firstName": "Kiet4"
+      //    },
+      //    {
+      //      "customer_id": "CUS003",
+      //      "firstName": "Kiet4"
+      //    }
+      //  ]
+      //},
+      //{
+      //  "titleForm": "Chi tiết khách hàng 1",
+      //  "tableName": "customerDetail1",
+      //  "primaryKey": [ "customer_detail_id" ],
+      //  "typeForm": "detail",
+      //  "classForm": "",
+      //  "style": "",
+      //  "ButtonControls": [
+      //    {
+      //      "name": "reset",
+      //      "type": "button",
+      //      "class": "fas fa-arrows-rotate",
+      //      "style": "",
+      //      "click": "onReset"
+      //    },
+      //    {
+      //      "name": "delete",
+      //      "type": "button",
+      //      "class": "fas fa-minus-circle",
+      //      "click": "removeDetailRow"
+      //    }
+      //  ],
+      //  "fieldControls": [
+      //    {
+      //      "name": "customer_id",
+      //      "label": "Mã khách hàng",
+      //      "type": "text",
+      //      "placeHolder": "Input customer ID",
+      //      "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+      //      "isReadOnly": null,
+      //      "isHidden": null,
+      //      "validators": [
+      //        {
+      //          "validatorName": "required",
+      //          "required": true,
+      //          "message": "*Customer ID is required"
+      //        }
+      //      ]
+      //    },
+      //    {
+      //      "name": "lastName",
+      //      "label": "Last Name",
+      //      "placeHolder": "Input Last Name",
+      //      "class": "form-control w-100 flex-fill rounded-0 text-center border-0 bg-transparent",
+      //      "type": "text",
+      //      "validators": [
+      //        {
+      //          "validatorName": "required",
+      //          "required": true,
+      //          "message": "*Last Name is required"
+      //        }
+      //      ]
+      //    }
+      //  ],
+      //  "initialDatas": [
+      //    {
+      //      "customer_id": "CUS004",
+      //      "lastName": "TUAN"
+      //    },
+      //    {
+      //      "customer_id": "CUS003",
+      //      "lastName": "DUONG"
+      //    }
+      //  ]
+      //}
     ],
 
     "initialDatas": [
-      {
-        "customer_id": "CUS001",
-        "firstName": "ALL",
-        "lastName": "OK"
-      },
-      {
-        "customer_id": "CUS002",
-        "firstName": "OK",
-        "lastName": "OK1"
-      },
-      {
-        "customer_id": "CUS001",
-        "firstName": "ALL",
-        "lastName": "OK"
-      },
-      {
-        "customer_id": "CUS002",
-        "firstName": "OK",
-        "lastName": "OK1"
-      },
-      {
-        "customer_id": "CUS002",
-        "firstName": "OK",
-        "lastName": "OK1"
-      },
-      {
-        "customer_id": "CUS002",
-        "firstName": "OK",
-        "lastName": "OK1"
-      }
-
     ]
 
   },

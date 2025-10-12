@@ -32,6 +32,7 @@ import { IOption } from '../../models/dynamic.model';
   styles: [
     `
       .select-wrapper {
+        position: relative;
       }
       .select-box {
         border: 1px solid #ccc;
@@ -55,16 +56,18 @@ import { IOption } from '../../models/dynamic.model';
       }
 
       .dropdown {
-        position: relative;
+        position: absolute;
+        z-index: 999;
+        top: 100%;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid #ddd;
+        background: rgba(255, 255, 255, 0.07);
+        // border: 1px solid #ddd;
         border-radius: 0.8rem;
-        margin-top: 4px;
+        // margin-top: 4px;
         max-height: 240px;
         overflow-y: auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
         list-style: none;
         padding: 0;
       }

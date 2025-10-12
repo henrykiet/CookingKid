@@ -8,8 +8,11 @@
 }
 
 nav {
-  border-radius: 0 0 1rem 1rem; /* chỉ bo dưới */
+  // border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.4);
+  border-top: none; /* Hoặc set border-top: none; */
+  margin: 0;
+  padding: 0;
 }
 
 // ul.pagination {
@@ -45,7 +48,7 @@ ul.pagination .page-link {
 
 /* active button nổi bật hơn */
 ul.pagination .page-item.active .page-link {
-  background: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(255, 255, 255, 0.22);
   color: #0b6623; /* chỉnh màu active */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }

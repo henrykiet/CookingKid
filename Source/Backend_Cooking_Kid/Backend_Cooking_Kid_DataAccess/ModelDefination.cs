@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Class định nghĩa model dựa vào file json trong entities 
 	/// </summary>
-	public class JsonDefination
+	public class ModelDefination
 	{
 		public string Model { get; set; } = string.Empty;
 		public SqlSchema Schema { get; set; } = new SqlSchema();

@@ -1,0 +1,165 @@
+{
+  "controller": "item",
+  "action": "list",
+  "vCId": "",
+  "vCDate": "",
+  "form": {
+    "titleForm": "Thông tin Sản phẩm/Vật tư",
+    "typeForm": "master",
+    "classForm": "",
+    "style": "",
+    "tableName": "items",
+    "primaryKey": [ "item_id" ],
+    "fieldControls": [
+      {
+        "name": "item_id",
+        "label": "Mã Sản phẩm",
+        "type": "text",
+        "placeHolder": "Nhập mã sản phẩm",
+        "class": "col-md-4",
+        "isReadOnly": null,
+        "isHidden": null,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Mã sản phẩm là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "item_name",
+        "label": "Tên Sản phẩm",
+        "type": "text",
+        "placeHolder": "Nhập tên sản phẩm",
+        "class": "col-md-8",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Tên sản phẩm là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "price",
+        "label": "Giá bán",
+        "type": "number",
+        "placeHolder": "Nhập giá bán",
+        "class": "col-md-4",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Giá bán là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "purchase",
+        "label": "Giá mua",
+        "type": "number",
+        "placeHolder": "Nhập giá mua",
+        "class": "col-md-4",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Giá mua là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "item_group_id",
+        "label": "Mã Nhóm",
+        "type": "text",
+        "placeHolder": "Nhập mã nhóm",
+        "class": "col-md-4",
+        "validators": [
+          // item_group_id cho phép NULL, nhưng ta có thể đặt required nếu muốn
+          // { "validatorName": "required", "required": true, "message": "*Mã nhóm là bắt buộc" }
+        ]
+      },
+      {
+        "name": "uom_id",
+        "label": "Đơn vị tính (UOM)",
+        "type": "text",
+        "placeHolder": "Nhập đơn vị tính",
+        "class": "col-md-4",
+        "validators": []
+      },
+      {
+        "name": "minimum_inventory",
+        "label": "Tồn kho Tối thiểu",
+        "type": "number",
+        "class": "col-md-4",
+        "validators": []
+      },
+      {
+        "name": "maximum_inventory",
+        "label": "Tồn kho Tối đa",
+        "type": "number",
+        "class": "col-md-4",
+        "validators": []
+      },
+      {
+        "name": "manufacturer",
+        "label": "Nhà sản xuất",
+        "type": "text",
+        "class": "col-md-12",
+        "validators": []
+      },
+      {
+        "name": "status",
+        "label": "Trạng thái",
+        "type": "radio",
+        "radioOptions": [ "Active", "Inactive" ],
+        "class": "col-md-4",
+        "validators": []
+      },
+      {
+        "name": "create_by",
+        "label": "Người tạo",
+        "type": "text",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Thông tin người tạo là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "create_at",
+        "label": "Ngày tạo",
+        "type": "date",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Thông tin ngày tạo là bắt buộc"
+          }
+        ]
+      }
+    ],
+
+    "detailForms": [
+    ],
+
+    "initialDatas": [
+    ]
+  },
+  "file": {
+    "title": "Tệp đính kèm",
+    "type": "file-attachment"
+  },
+  "dataProcessing": {
+    "actions": {
+      "post": []
+    }
+  }
+}

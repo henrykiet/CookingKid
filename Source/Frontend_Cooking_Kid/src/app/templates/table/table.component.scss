@@ -1,0 +1,50 @@
+table {
+  // border: 1px solid black;
+  min-width: max-content;
+  border-radius: 1rem;
+  margin: 0;
+  width: 100%;
+}
+thead {
+  background: rgb(192, 241, 192);
+  position: sticky;
+  top: 0px;
+}
+
+.pagination-wrapper {
+  /* Đảm bảo pagination-wrapper có cùng chiều rộng cuộn với bảng */
+  width: 100%;
+  position: sticky;
+  bottom: 0; /* Dính vào đáy của .table-wrapper */
+  z-index: 10; /* Đảm bảo nó nằm trên thead khi cuộn */
+}
+
+app-pagination {
+  border-radius: 0 0 1rem 1rem;
+  bottom: 0;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid rgba(117, 88, 88, 0.4);
+  padding: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+  background: transparent;
+}
+
+.td-action {
+  display: flex; /* Sử dụng flexbox cho nội dung */
+  gap: 0.5rem;
+  justify-content: center; /* Căn giữa các nút bên trong <td> */
+  align-items: center;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  border-radius: 1rem;
+  min-width: max-content;
+  background: rgba(248, 250, 248, 0.829);
+}

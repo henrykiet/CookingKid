@@ -37,7 +37,7 @@ export class DynamicService {
         })
       );
   }
-
+  //call api get form
   handleMetadataForm(
     metadataForm: IMetadataForm | null
   ): Observable<IMetadataForm | null> {
@@ -46,16 +46,16 @@ export class DynamicService {
       .pipe(
         map((response) => {
           if (response.success) {
-            localStorage.setItem(
-              'metadataConfig',
-              JSON.stringify(response.data)
-            );
-            localStorage.setItem(
-              'formConfig',
-              JSON.stringify(response.data.form)
-            );
-            this.metadataConfig = response.data;
-            this.formConfig = response.data.form ?? null;
+            // localStorage.setItem(
+            //   'metadataConfig',
+            //   JSON.stringify(response.data)
+            // );
+            // localStorage.setItem(
+            //   'formConfig',
+            //   JSON.stringify(response.data.form)
+            // );
+            // this.metadataConfig = response.data;
+            // this.formConfig = response.data.form ?? null;
             return response.data;
           } else {
             return null;

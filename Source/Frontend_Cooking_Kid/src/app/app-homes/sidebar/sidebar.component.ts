@@ -1,14 +1,18 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
+  Input,
   OnInit,
   Output,
 } from '@angular/core';
-import { menuData, sidebarData, SidebarToggle } from './side-data';
+import { menuData, SidebarToggle } from '../../models/side-data';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { IMetadataForm } from '../../models/dynamic.model';
+import { DynamicService } from '../../services/dynamic.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -19,6 +23,7 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class SidebarComponent implements OnInit {
   @Output() onToggleSidebar: EventEmitter<SidebarToggle> = new EventEmitter();
+  @Output() controllerName: EventEmitter<string> = new EventEmitter<string>();
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     if (typeof window !== 'undefined') {
@@ -32,23 +37,88 @@ export class SidebarComponent implements OnInit {
       }
     }
   }
-
+  @Input() metaform: IMetadataForm | null = null;
+  isHover = false;
   collapsed = false;
   screenWidth = 0;
   sideData: menuData[] = [];
   previousExpandedItems: menuData[] = [];
-  constructor(private router: Router) {}
+  constructor(
+    private dynamicService: DynamicService,
+    private elementRef: ElementRef
+  ) {}
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') {
       this.screenWidth = window.innerWidth;
     }
 
-    //gọi hàm load menu cho sau này sử dụng
-    this.sideData = this.loadMenu(sidebarData);
+    // gọi hàm load menu cho sau này sử dụng
+    const sideDataString = localStorage.getItem('sideData');
+    // Kiểm tra nếu sideDataString có giá trị (không phải null)
+    if (sideDataString) {
+      try {
+        // Chỉ parse khi chắc chắn là string (sideDataString !== null)
+        this.sideData = JSON.parse(sideDataString);
+      } catch (e) {
+        console.error('Lỗi khi parse sideData từ localStorage:', e);
+        this.getMenus();
+        return;
+      }
+    }
+    if (!this.sideData) {
+      this.getMenus();
+    }
   }
 
-  //hàm gọi api menu
+  //call api get menus
+  getMenus() {
+    this.metaform = new Object() as IMetadataForm;
+    this.metaform.controller = 'menus';
+    this.metaform.action = 'list';
+    this.dynamicService.handleMetadataForm(this.metaform).subscribe({
+      next: (res) => {
+        if (res) {
+          this.metaform = res;
+          console.log(this.metaform);
+          //map to sideBar data
+          const newSideData =
+            this.metaform.form?.initialDatas.map((item: any) => {
+              // Tìm các subItem thuộc về parent hiện tại
+              const children: menuData[] = [];
+              this.metaform?.form?.detailForms?.forEach((childForm: any) => {
+                childForm.initialDatas.forEach((subItem: any) => {
+                  if (subItem.menu_id == item.menu_id) {
+                    children.push({
+                      label: subItem.label,
+                      routeLink: subItem.routeLink,
+                      icon: subItem.icon,
+                      expanded: subItem.expanded ?? false,
+                    });
+                  }
+                });
+              });
+
+              return {
+                label: item.label,
+                routeLink: item.routeLink,
+                icon: item.icon,
+                expanded: item.expanded ?? false,
+                children: children.length > 0 ? children : undefined,
+              } as menuData;
+            }) ?? [];
+          this.sideData = newSideData;
+          localStorage.setItem('sideData', JSON.stringify(this.sideData));
+        } else {
+          console.error('No form configuration found');
+        }
+      },
+      error: (err) => {
+        console.error('Error loading form', err);
+      },
+    });
+  }
+
   loadMenu(item: any[]): menuData[] {
     return item.map((i) => ({
       label: i.label,
@@ -59,20 +129,23 @@ export class SidebarComponent implements OnInit {
     }));
   }
 
-  //handle sidebar
-  toggleCollapse(): void {
+  //click logo
+  openSidebar() {
     this.collapsed = !this.collapsed;
+    this.toggleCollapse(this.collapsed);
+  }
 
-    //khi thu gọn
-    if (!this.collapsed) {
-      //lưu lại các item đã mở trước đó
+  //handle open and close sidebar
+  toggleCollapse(isCollapse: boolean): void {
+    // Logic lưu/phục hồi menu dựa trên tham số isCollapse
+    if (isCollapse) {
+      // Logic LƯU và ĐÓNG menu con (khi thu gọn)
       this.previousExpandedItems = this.sideData.filter(
         (item) => item.expanded
       );
-      //đóng hết submenu
       this.closeAllSubMenus();
     } else {
-      // Khi mở rộng => mở lại previous menu nếu có
+      // Logic PHỤC HỒI menu (khi mở rộng)
       this.previousExpandedItems.forEach((prevItem) => {
         const match = this.sideData.find(
           (item) => item.label === prevItem.label
@@ -82,33 +155,64 @@ export class SidebarComponent implements OnInit {
         }
       });
     }
-
     this.onToggleSidebar.emit({
       collapsed: this.collapsed,
       screenWidth: this.screenWidth,
     });
   }
 
-  //nút chọn item
+  //dropdown child
   onItemClick(item: menuData, event: MouseEvent) {
     if (item.children) {
       event.preventDefault();
-
       item.expanded = !item.expanded;
     }
-
-    if (this.collapsed == false) item.expanded = false;
     this.onToggleSidebar.emit({
       collapsed: this.collapsed,
       screenWidth: this.screenWidth,
     });
   }
 
+  //close submenu
   closeAllSubMenus(): void {
     this.sideData.forEach((item) => {
       if (item.children) {
         item.expanded = false;
       }
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: Event) {
+    // 1. Kiểm tra xem click có nằm NGOÀI sidebar không
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      // 2. Nếu sidebar đang MỞ RỘNG (collapsed = false) HOẶC đang HOVER mở rộng
+      if (this.collapsed === false || this.isHover === true) {
+        // 3. SET trạng thái thu gọn và gọi hàm xử lý
+        this.collapsed = true; // Set trạng thái THU GỌN
+        this.isHover = false; // Tắt trạng thái hover
+        this.toggleCollapse(true); // Gọi hàm xử lý menu (true = thu gọn)
+      }
+    }
+  }
+
+  // Di chuột VÀO sidebar
+  @HostListener('mouseenter')
+  onMouseEnter() {
+    if (this.collapsed === true || this.isHover === false) {
+      this.collapsed = false;
+      this.isHover = true;
+      this.toggleCollapse(false);
+    }
+  }
+
+  // Di chuột RA khỏi sidebar
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    if (this.collapsed === false || this.isHover === true) {
+      this.collapsed = true;
+      this.isHover = false;
+      this.toggleCollapse(true);
+    }
   }
 }

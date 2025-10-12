@@ -1,12 +1,9 @@
 .search-box {
-  border: 1px solid #ccc;      /* khung */
-  border-radius: 8px;          /* bo góc */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* bóng */
-  padding: 0.5rem 1rem;        /* khoảng cách trong */
-  display: inline-block;       /* gọn vừa nội dung */
-  background-color: #71e2dd;      /* nền trắng cho rõ bóng */
+  border: 1px solid #ccc; /* khung */
+  border-radius: 8px; /* bo góc */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* bóng */
+  padding: 0.5rem 1rem; /* khoảng cách trong */
+  display: inline-block; /* gọn vừa nội dung */
+  background-color: #71e2dcbd; /* nền trắng cho rõ bóng */
   align-items: center;
 }
-
-
-

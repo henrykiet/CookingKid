@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
@@ -10,15 +10,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
   isShowUserMenu: boolean = false;
-
+  @Input()
   toggleUser() {
     this.isShowUserMenu = !this.isShowUserMenu;
   }
 
   constructor() {}
-  ngOnInit(): void {
-    // if (localStorage.getItem('formConfig')) {
-    //   this.form = JSON.parse(localStorage.getItem('formConfig') || '{}');
-    // }
-  }
+  ngOnInit(): void {}
 }
