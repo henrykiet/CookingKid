@@ -41,34 +41,7 @@
           }
         ]
       },
-      {
-        "name": "price",
-        "label": "Giá bán",
-        "type": "number",
-        "placeHolder": "Nhập giá bán",
-        "class": "col-md-4",
-        "validators": [
-          {
-            "validatorName": "required",
-            "required": true,
-            "message": "*Giá bán là bắt buộc"
-          }
-        ]
-      },
-      {
-        "name": "purchase",
-        "label": "Giá mua",
-        "type": "number",
-        "placeHolder": "Nhập giá mua",
-        "class": "col-md-4",
-        "validators": [
-          {
-            "validatorName": "required",
-            "required": true,
-            "message": "*Giá mua là bắt buộc"
-          }
-        ]
-      },
+
       {
         "name": "item_group_id",
         "label": "Mã Nhóm",
@@ -109,13 +82,34 @@
         "class": "col-md-12",
         "validators": []
       },
+
       {
-        "name": "status",
-        "label": "Trạng thái",
-        "type": "radio",
-        "radioOptions": [ "Active", "Inactive" ],
+        "name": "sale_price",
+        "label": "Giá bán",
+        "type": "number",
+        "placeHolder": "Nhập giá bán",
         "class": "col-md-4",
-        "validators": []
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Giá bán là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "cost_price",
+        "label": "Giá mua",
+        "type": "number",
+        "placeHolder": "Nhập giá mua",
+        "class": "col-md-4",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Giá mua là bắt buộc"
+          }
+        ]
       },
       {
         "name": "create_by",
@@ -123,12 +117,8 @@
         "type": "text",
         "class": "col-md-4",
         "isReadOnly": true,
+        "isHidden":  true,
         "validators": [
-          {
-            "validatorName": "required",
-            "required": true,
-            "message": "*Thông tin người tạo là bắt buộc"
-          }
         ]
       },
       {
@@ -137,13 +127,17 @@
         "type": "date",
         "class": "col-md-4",
         "isReadOnly": true,
+        "isHidden": true,
         "validators": [
-          {
-            "validatorName": "required",
-            "required": true,
-            "message": "*Thông tin ngày tạo là bắt buộc"
-          }
         ]
+      },
+      {
+        "name": "status",
+        "label": "Trạng thái",
+        "type": "radio",
+        "radioOptions": [ "Active", "Inactive" ],
+        "class": "col-md-4",
+        "validators": []
       }
     ],
 

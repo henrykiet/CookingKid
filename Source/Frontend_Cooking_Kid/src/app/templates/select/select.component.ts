@@ -8,7 +8,7 @@ import { IOption } from '../../models/dynamic.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="select-wrapper">
+    <div class="select-wrapper" [style]="style">
       <label [class]="classLabel">{{ label }}</label>
 
       <!-- Box hiển thị giá trị -->
@@ -35,45 +35,47 @@ import { IOption } from '../../models/dynamic.model';
         position: relative;
       }
       .select-box {
-        border: 1px solid #ccc;
         border-radius: 1rem;
         padding: 8px 12px;
         background: rgba(255, 255, 255, 0.5);
         cursor: pointer;
+        z-index: 100;
 
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        &:hover {
-          border-color: #3b82f6;
-        }
       }
 
       .icon {
-        font-size: 18px;
+        font-size: 25px;
         color: #555;
       }
 
       .dropdown {
         position: absolute;
-        z-index: 999;
+        margin-top: 4px;
         top: 100%;
+        z-index: 999;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.07);
         // border: 1px solid #ddd;
         border-radius: 0.8rem;
         // margin-top: 4px;
         max-height: 240px;
         overflow-y: auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         list-style: none;
         padding: 0;
+        color: rgba(0, 0, 0, 0.8);
+        // background: rgba(209, 250, 151, 0.95);
+        background: rgba(255, 255, 255, 1);
+
+        /* Áp dụng hiệu ứng mờ */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       .dropdown-item {
-        padding: 8px 12px;
         cursor: pointer;
         border-radius: 0.8rem;
         display: block;
@@ -83,8 +85,13 @@ import { IOption } from '../../models/dynamic.model';
         max-width: 100%; /* giới hạn theo khung */
         align-items: center;
         text-align: center;
+        padding: 0.5rem 2rem;
         &:hover {
-          background-color: #e0f2fe;
+          border-radius: 0.8rem;
+          background-color: transparent;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          color: rgba(212, 173, 0, 1);
+          // color: rgba(255, 255, 255, 0.75);
         }
       }
     `,
@@ -99,6 +106,7 @@ import { IOption } from '../../models/dynamic.model';
 })
 export class SelectComponent {
   @Input() label? = '';
+  @Input() style? = '';
   @Input() classLabel? = '';
   @Input() classSelect? = 'form-select';
   @Input() placeHolder? = 'Choose...';

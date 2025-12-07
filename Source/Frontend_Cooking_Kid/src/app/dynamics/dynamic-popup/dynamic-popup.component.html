@@ -10,90 +10,117 @@
         class="row my-2 g-2 pb-2 px-2 glass"
         [class]="form.classForm"
         [style]="form.style"
+        style="z-index: 1; position: relative"
       >
         <ng-container *ngFor="let field of form?.fieldControls">
-          <!-- text -->
-          <div
-            *ngIf="['text', 'email', 'password', 'number'].includes(field.type)"
-            [class]="field.class"
-          >
-            <app-input
-              classInput="form-control"
-              classLabel="form-label"
-              [formControlName]="field.name"
-              [label]="field.label"
-              [placeHolder]="field.placeHolder"
-            ></app-input>
-            <small
-              class="text-danger"
+          <ng-container *ngIf="!field.isHidden">
+            <!-- text -->
+            <div
               *ngIf="
-                dynamicFormGroup.get(field.name)?.invalid &&
-                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
+                ['text', 'email', 'password', 'number'].includes(field.type)
               "
-              >{{ getValidationErrors(field.name, field.validators) }}</small
+              [class]="field.class"
             >
-          </div>
-          <!-- select -->
-          <div *ngIf="field.type === 'select'" [class]="field.class">
-            <app-select
-              [label]="field.label"
-              [options]="field.options || []"
-              classLabel="form-label"
-              classSelect="form-select"
-              [formControlName]="field.name"
-              [placeHolder]="field.value"
-            ></app-select>
-            <small
-              class="text-danger"
-              *ngIf="
-                dynamicFormGroup.get(field.name)?.invalid &&
-                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
-              "
-              >{{ getValidationErrors(field.name, field.validators) }}</small
-            >
-          </div>
-          <!-- Radio -->
-          <div *ngIf="field.type === 'radio'" [class]="field.class">
-            <app-radio
-              *ngIf="field.type === 'radio'"
-              [formControlName]="field.name"
-              [label]="field.label"
-              [options]="field.radioOptions"
-              classLabel="form-label"
-              [for]="field.name"
-            ></app-radio>
+              <app-input
+                classInput="form-control"
+                classLabel="form-label"
+                [formControlName]="field.name"
+                [label]="field.label"
+                [placeHolder]="field.placeHolder"
+                [isHidden]="field.isHidden"
+                [isReadOnly]="field.isReadOnly"
+                [style]="field.style"
+              ></app-input>
+              <small
+                class="text-danger"
+                *ngIf="
+                  dynamicFormGroup.get(field.name)?.invalid &&
+                  (dynamicFormGroup.get(field.name)?.touched ||
+                    myForm.submitted)
+                "
+                >{{ getValidationErrors(field.name, field.validators) }}</small
+              >
+            </div>
+            <!-- select -->
+            <div *ngIf="field.type === 'select'" [class]="field.class">
+              <app-select
+                [label]="field.label"
+                [options]="field.options || []"
+                classLabel="form-label"
+                classSelect="form-select"
+                [formControlName]="field.name"
+                [placeHolder]="field.placeHolder"
+                [style]="field.style"
+              ></app-select>
+              <small
+                class="text-danger"
+                *ngIf="
+                  dynamicFormGroup.get(field.name)?.invalid &&
+                  (dynamicFormGroup.get(field.name)?.touched ||
+                    myForm.submitted)
+                "
+                >{{ getValidationErrors(field.name, field.validators) }}</small
+              >
+            </div>
+            <!-- Radio -->
+            <div *ngIf="field.type === 'radio'" [class]="field.class">
+              <app-radio
+                *ngIf="field.type === 'radio'"
+                [formControlName]="field.name"
+                [nameRadio]="field.name"
+                [label]="field.label"
+                [options]="field.radioOptions"
+                classLabel="form-label"
+                [for]="field.name"
+                [style]="field.style"
+              ></app-radio>
 
-            <small
-              class="text-danger"
-              *ngIf="
-                dynamicFormGroup.get(field.name)?.invalid &&
-                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
-              "
-              >{{ getValidationErrors(field.name, field.validators) }}</small
-            >
-          </div>
-          <!-- Date -->
-          <div *ngIf="field.type === 'date'" [class]="field.class">
-            <label [for]="field.name" class="form-label">{{
-              field.label
-            }}</label>
+              <small
+                class="text-danger"
+                *ngIf="
+                  dynamicFormGroup.get(field.name)?.invalid &&
+                  (dynamicFormGroup.get(field.name)?.touched ||
+                    myForm.submitted)
+                "
+                >{{ getValidationErrors(field.name, field.validators) }}</small
+              >
+            </div>
+            <!-- Date -->
+            <div *ngIf="field.type === 'date'" [class]="field.class + ' '">
+              <label [for]="field.name" class="form-label">{{
+                field.label
+              }}</label>
 
-            <input
-              [type]="field.type"
+              <input
+                [type]="field.type"
+                [id]="field.name"
+                [name]="field.name"
+                [formControlName]="field.name"
+                class="form-control"
+                style="
+                  border-radius: 1rem;
+                  padding: 0.5rem;
+                  background: rgba(255, 255, 255, 0.5);
+                "
+                [style]="field.style"
+              />
+              <!-- <app-date
               [id]="field.name"
-              [name]="field.name"
               [formControlName]="field.name"
-              class="form-control"
-            />
-            <small
-              class="text-danger"
-              *ngIf="
-                dynamicFormGroup.get(field.name)?.invalid &&
-                (dynamicFormGroup.get(field.name)?.touched || myForm.submitted)
-              "
-              >{{ getValidationErrors(field.name, field.validators) }}</small
-            >
-          </div>
+              [style]="field.style"
+              [name]="field.name"
+            ></app-date> -->
+              <small
+                class="text-danger"
+                *ngIf="
+                  dynamicFormGroup.get(field.name)?.invalid &&
+                  (dynamicFormGroup.get(field.name)?.touched ||
+                    myForm.submitted)
+                "
+                >{{ getValidationErrors(field.name, field.validators) }}</small
+              >
+            </div>
+          </ng-container>
         </ng-container>
       </div>
 
@@ -120,90 +147,14 @@
           *ngFor="let detailForm of form.detailForms; let i = index"
         >
           <ng-container *ngIf="activeDetailIndex === i">
-            <table
-              [class]="detailForm.classForm"
-              class="table table-striped table-bordered glass glass-table"
-              [style]="detailForm.style"
+            <app-table
+              [field]="detailForm.fieldControls"
+              [isDetail]="true"
+              [formArray]="getDetailFormArray(detailForm.tableName)"
+              [formArrayName]="detailForm.tableName!"
+              [isFormSubmitted]="myForm.submitted"
             >
-              <thead>
-                <tr>
-                  <th
-                    *ngFor="let field of detailForm?.fieldControls"
-                    class="text-center"
-                  >
-                    <div>
-                      {{ field.label }}
-                    </div>
-                  </th>
-                  <th Class="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody
-                *ngIf="
-                  detailForm.tableName &&
-                  dynamicFormGroup.get(detailForm.tableName)
-                "
-                [formArrayName]="detailForm.tableName"
-                class="scroll-hidden"
-              >
-                <tr
-                  *ngFor="
-                    let row of getInitialData(detailForm.tableName)?.controls ||
-                      [];
-                    let rowIndex = index
-                  "
-                  [formGroupName]="rowIndex"
-                >
-                  <td
-                    *ngFor="let field of detailForm?.fieldControls"
-                    class="text-center"
-                  >
-                    <input
-                      [type]="field.type"
-                      [formControlName]="field.name"
-                      [class]="field.class"
-                      [style]="field.style"
-                      [placeholder]="field.placeHolder"
-                    />
-                    <small class="text-danger">
-                      {{
-                        getValidationErrors(field.name, field.validators, row)
-                      }}
-                    </small>
-                  </td>
-                  <td>
-                    <div class="td-action">
-                      <ng-container
-                        *ngFor="let button of detailForm.buttonControls"
-                      >
-                        <app-button
-                          variant="btn-icon"
-                          [type]="button.type"
-                          [ngClass]="button.name"
-                          [style]="button.style"
-                          [icon]="button.class"
-                          (onClick)="
-                            handelMasterForm(false);
-                            invokeAction(button.click, detailForm, rowIndex)
-                          "
-                        >
-                        </app-button>
-                      </ng-container>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-              <!-- <tfoot>
-                <app-pagination
-                  [classNav]="'glass'"
-                  [classUl]="'glass'"
-                  [currentPage]="currentPage"
-                  [totalPages]="totalPages"
-                  (pageChange)="onPageChange($event)"
-                >
-                </app-pagination>
-              </tfoot> -->
-            </table>
+            </app-table>
           </ng-container>
         </ng-container>
       </ng-container>

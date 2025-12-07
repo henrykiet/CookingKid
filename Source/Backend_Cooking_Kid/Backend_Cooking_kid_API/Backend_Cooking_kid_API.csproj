@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Backend_Cooking_Kid_BusinessLogic\Backend_Cooking_Kid_BusinessLogic.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Forms\Lookup\" />
+  </ItemGroup>
+
 </Project>

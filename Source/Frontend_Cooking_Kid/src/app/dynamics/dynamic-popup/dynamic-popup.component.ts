@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, Output } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -20,6 +20,10 @@ import { ButtonComponent } from '../../templates/button/button.component';
 import { InputComponent } from '../../templates/input/input.component';
 import { SelectComponent } from '../../templates/select/select.component';
 import { RadioComponent } from '../../templates/radio/radio.component';
+import { TableComponent } from '../../templates/table/table.component';
+import { ViewHelperService } from '../../helpers/view-helper';
+import { Router } from '@angular/router';
+// import { DateComponent } from '../../templates/date/date.component';
 
 @Component({
   selector: 'app-dynamic-popup',
@@ -32,60 +36,70 @@ import { RadioComponent } from '../../templates/radio/radio.component';
     InputComponent,
     SelectComponent,
     RadioComponent,
+    TableComponent,
+    // DateComponent,
   ],
   templateUrl: './dynamic-popup.component.html',
-  styleUrl: './dynamic-popup.component.scss',
 })
 export class DynamicPopupComponent {
+  formArray: FormArray | null = null;
+  action: string = 'update';
   @Input() form: IForm | null = null;
   metadataForm: IMetadataForm | null = null;
   loading: boolean = true;
   fb = inject(FormBuilder);
   dynamicFormGroup: FormGroup = this.fb.group({}, { updateOn: 'submit' });
   isMaster: boolean = false;
+  //khai báo nút chuyển tab detail
   activeDetailIndex: number = 0;
   setActiveDetail(index: number) {
     this.activeDetailIndex = index;
   }
-  constructor(private dynamicService: DynamicService) {}
-  private isBrowser(): boolean {
-    return typeof window !== 'undefined';
-  }
+
+  constructor(
+    private dynamicService: DynamicService,
+    private viewHelper: ViewHelperService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    if (localStorage.getItem('metadataConfig')) {
-      this.metadataForm = JSON.parse(localStorage.getItem('metadataConfig')!);
-      this.form = this.metadataForm?.form || null;
-      if (this.form) {
-        this.validations();
-        this.loading = false;
-      } else {
-        console.error('No Form config found in localStorage');
+    const metadataString = localStorage.getItem('metadataConfig');
+    if (metadataString) {
+      // Kiểm tra cả 2 điều kiện
+      this.metadataForm = JSON.parse(metadataString);
+      if (this.metadataForm) {
+        this.getPopupForm(this.metadataForm);
+        console.log(this.metadataForm.action);
       }
     } else {
-      console.error('No Metadata Config found in localStorage');
+      console.error(
+        'Missing metadataConfig or pkValue in localStorage. Cannot load popup form.'
+      );
+      // Có thể thêm logic điều hướng về trang Grid nếu thiếu dữ liệu
+      // this.router.navigate(['../'], { relativeTo: this.route });
     }
   }
 
-  // getPopupForm(): void {
-  //   this.loading = true;
-  //   this.dynamicService.handleMetadataForm(this.metadataForm).subscribe({
-  //     next: (res) => {
-  //       if (res && res.form) {
-  //         this.form = res.form;
-  //         localStorage.setItem('metadataConfig', JSON.stringify(this.form));
-  //         this.validations();
-  //       } else {
-  //         console.error('No form configuration found');
-  //       }
-  //       this.loading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading form', err);
-  //       this.loading = false;
-  //     },
-  //   });
-  // }
+  getPopupForm(metadataForm: IMetadataForm): void {
+    this.loading = true;
+    this.dynamicService.getMetadataForm(metadataForm).subscribe({
+      next: (res) => {
+        if (res && res.form) {
+          this.form = res.form;
+          // if (this.form)
+          //   this.viewHelper.FilterFieldControl(this.form, this.action);
+          this.validations();
+        } else {
+          console.error('No form configuration found');
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading form', err);
+        this.loading = false;
+      },
+    });
+  }
 
   validations() {
     if (this.form?.fieldControls && this.form.fieldControls.length > 0) {
@@ -98,17 +112,16 @@ export class DynamicPopupComponent {
           let value = initialRecord?.[control.name];
           let fieldName = control.name;
           if (control.type == 'date' && value) {
-            const dateString = String(value).split(' ')[0]; // Lấy phần ngày: "08/05/1991"
-            const parts = dateString.split('/');
+            const dateString = String(value).split('T')[0]; // Lấy phần ngày: "08/05/1991"
+            const parts = dateString.split('-');
 
             if (parts.length === 3) {
               // Giả sử: parts[0] là Ngày (08), parts[1] là Tháng (05), parts[2] là Năm (1991)
               // Chuyển sang định dạng chuẩn YYYY-MM-DD
-              const day = parts[0].padStart(2, '0'); // 08
+              const day = parts[2].padStart(2, '0'); // 08
               const month = parts[1].padStart(2, '0'); // 05
-              const year = parts[2]; // 1991
-
-              value = `${year}-${month}-${day}`; // Kết quả: "1991-05-08"
+              const year = parts[0]; // 1991
+              value = `${year}-${month}-${day}`;
             }
           } else if (control.type == 'radio' && value) {
             control.radioOptions?.forEach((radio) => {
@@ -119,25 +132,23 @@ export class DynamicPopupComponent {
               }
             });
           } else if (control.type == 'select') {
-            if (control.options && typeof value === 'string') {
-              // 2. Ép kiểu rõ ràng biến lặp `select` thành IOption
-              // Sử dụng for...of hoặc forEach với khai báo kiểu rõ ràng
+            if (control.options && value) {
+              let found = false;
               for (const select of control.options as IOption[]) {
-                // 3. Đảm bảo select.id không phải undefined trước khi gọi String()
                 const idValue =
                   select.id !== undefined ? String(select.id) : '';
                 const selectLower = idValue.toLowerCase();
-
                 const lowerValue = value.toLowerCase();
-
-                console.log('select', select.id, select.value);
-
-                // 4. Nếu tìm thấy, gán giá trị và THOÁT KHỎI VÒNG LẶP
+                // Nếu giá trị data (A) khớp với ID của option (A)
                 if (selectLower == lowerValue) {
-                  value = select.value;
-                  // Nếu đây là hàm xử lý gán giá trị, bạn nên dùng return hoặc flag để dừng lại
-                  // break; // Bạn không thể dùng break trong forEach, nên dùng for...of hoặc .find()
+                  value = select.id;
+                  found = true;
+                  break;
                 }
+              }
+              // Nếu không tìm thấy, giá trị nên là null/empty string để kích hoạt required
+              if (!found) {
+                value = '';
               }
             }
           }
@@ -201,12 +212,17 @@ export class DynamicPopupComponent {
     validators: IValidator[],
     group?: AbstractControl
   ): string {
-    const control = group
-      ? (group as FormGroup).get(fieldName)
-      : this.dynamicFormGroup.get(fieldName);
+    let control: AbstractControl | null;
 
-    if (!control) return '';
-
+    // Trường hợp 1: Nếu group được truyền vào (detail table), tìm control trong group đó
+    if (group) {
+      control = (group as FormGroup).get(fieldName);
+    }
+    // Trường hợp 2: Master form, tìm control trong dynamicFormGroup chính
+    else {
+      control = this.dynamicFormGroup.get(fieldName);
+    }
+    if (!control || control.valid) return '';
     let errorMessage = '';
     validators.forEach((validator) => {
       if (control.hasError(validator.validatorName as string)) {
@@ -225,7 +241,6 @@ export class DynamicPopupComponent {
 
   handelMasterForm(is: boolean): void {
     this.isMaster = is;
-    console.log('isMaster:', this.isMaster);
   }
 
   invokeAction(methodName: string | undefined, ...args: any[]) {
@@ -238,14 +253,44 @@ export class DynamicPopupComponent {
   }
 
   onSubmit() {
-    this.validations();
+    this.dynamicFormGroup.markAllAsTouched();
+    if (this.dynamicFormGroup.invalid) {
+      console.warn('Form is invalid. Cannot submit.');
+      return;
+    } else {
+      if (!this.metadataForm) {
+        console.warn('Metadata form is not exist');
+        return;
+      }
+      const requestMetadata: IMetadataForm = {
+        ...this.metadataForm,
+        initialDatas: this.dynamicFormGroup.value,
+      };
+      console.log('Dynamic when update:', this.dynamicFormGroup.value);
+      this.dynamicService.updateMetadataForm(requestMetadata).subscribe({
+        next: (res) => {
+          if (res?.success) {
+            console.log('success');
+            localStorage.removeItem('metadataConfig');
+            const controllerName = this.metadataForm?.controller;
+            if (controllerName) {
+              this.router.navigate(['/grid', controllerName]);
+            } else {
+              console.error(
+                'Controller name is missing, cannot navigate back to grid.'
+              );
+              // Có thể điều hướng về trang chủ hoặc trang mặc định
+              // this.router.navigate(['/']);
+            }
+          } else {
+            console.log('unsuccess');
+          }
+        },
+      });
+    }
   }
 
   onReset(detailForm: any | null, rowIndex: number | null) {
-    console.log('Resetting form...');
-    console.log('Detail Form:', detailForm);
-    console.log('Row Index:', rowIndex);
-    console.log('dynamicFormGroup:', this.dynamicFormGroup);
     //reset master
     if (this.isMaster && this.form) {
       console.log('Resetting master form...');
@@ -272,20 +317,16 @@ export class DynamicPopupComponent {
       }
     }
   }
-  // Remove detail row
-  removeDetailRow(detailForm: IForm, rowIndex: number): void {
-    if (!detailForm.tableName) return;
 
-    const formArray = this.dynamicFormGroup.get(
-      detailForm.tableName
-    ) as FormArray;
-    if (formArray && formArray.length > rowIndex) {
-      formArray.removeAt(rowIndex); // Xóa dòng trong FormArray
+  // HÀM GETTER ĐỂ LẤY FORM ARRAY TỪ FORM GROUP
+  getDetailFormArray(tableName: string | undefined): FormArray | null {
+    if (!tableName) return null;
+    // Tránh lỗi kiểu dữ liệu và đảm bảo nó là FormArray
+    const control = this.dynamicFormGroup.get(tableName);
+    if (control instanceof FormArray) {
+      this.formArray = control;
+      return control;
     }
-
-    // Nếu bạn muốn đồng bộ lại luôn cả initialDatas trong metadata
-    if (detailForm.initialDatas) {
-      detailForm.initialDatas.splice(rowIndex, 1);
-    }
+    return null;
   }
 }

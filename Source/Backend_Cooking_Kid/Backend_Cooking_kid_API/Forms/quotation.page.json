@@ -1,0 +1,320 @@
+{
+  "controller": "quotation",
+  "action": "list",
+  "isPartition": true,
+  "partition": "",
+  "form": {
+    "titleForm": "Thông tin Báo giá (Quotation)",
+    "typeForm": "master",
+    "classForm": "",
+    "style": "",
+    "tableName": "Quotations",
+    "primaryKey": [ "quotation_id" ],
+    "fieldControls": [
+      {
+        "name": "quotation_id",
+        "label": "Mã Báo giá",
+        "type": "text",
+        "placeHolder": "Tự động sinh",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "isHidden": true,
+        "validators": [],
+        "isView": [ "update" ]
+      },
+      {
+        "name": "quotation_code",
+        "label": "Số Báo giá",
+        "type": "text",
+        "placeHolder": "Chọn số báo giá",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Số Báo giá là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "quotation_date",
+        "label": "Ngày Báo giá",
+        "type": "date",
+        "placeHolder": "Chọn ngày báo giá",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Ngày Báo giá là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "customer_id",
+        "label": "Khách hàng",
+        "type": "text",
+        "placeHolder": "Chọn Khách hàng (User ID)",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Khách hàng là bắt buộc"
+          }
+        ]
+      },
+      {
+        "name": "employee_id",
+        "label": "Nhân viên tạo",
+        "type": "select",
+        "placeHolder": "Chọn Nhân viên (Employee ID)",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "isHidden": false,
+        "validators": [],
+        "options": [],
+        "isView": [ "" ]
+      },
+      {
+        "name": "email_customer",
+        "label": "Email Khách hàng",
+        "type": "email",
+        "placeHolder": "Email khách hàng",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": [],
+        "isView": [ "update" ]
+      },
+      {
+        "name": "phone_customer",
+        "label": "SĐT Khách hàng",
+        "type": "text",
+        "placeHolder": "Số điện thoại khách hàng",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": [],
+        "isView": [ "update" ]
+      },
+
+      {
+        "name": "total_payment",
+        "label": "Tổng thanh toán",
+        "type": "text",
+        "placeHolder": "0.00",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "isHidden": false,
+        "validators": []
+      },
+      {
+        "name": "total_vat",
+        "label": "Tổng VAT",
+        "type": "text",
+        "placeHolder": "0.00",
+        "class": "col-md-4",
+        "isReadOnly": true,
+        "isHidden": false,
+        "validators": [],
+        "isView": [ "update" ]
+      },
+      {
+        "name": "status",
+        "label": "Trạng thái",
+        "type": "select",
+        "placeHolder": "Chọn trạng thái",
+        "class": "col-md-4",
+        "isReadOnly": false,
+        "isHidden": false,
+
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Trạng thái là bắt buộc"
+          }
+        ],
+        "options": [
+          {
+            "id": "A",
+            "value": "Active/Đã gửi"
+          },
+          {
+            "id": "P",
+            "value": "Pending/Chờ duyệt"
+          },
+          {
+            "id": "C",
+            "value": "Closed/Đã chốt"
+          },
+          {
+            "id": "R",
+            "value": "Rejected/Từ chối"
+          }
+        ]
+      },
+      {
+        "name": "note",
+        "label": "Ghi chú",
+        "type": "textarea",
+        "placeHolder": "Ghi chú cho báo giá",
+        "class": "col-md-12",
+        "isReadOnly": false,
+        "isHidden": false,
+        "validators": []
+      }
+    ],
+    "detailForms": [
+      {
+        "titleForm": "Chi tiết Vật tư",
+        "tableName": "QuotationDetails",
+        "primaryKey": [ "quotation_id", "line_nbr" ],
+        "typeForm": "detail",
+        "classForm": "",
+        "style": "",
+        "ButtonControls": [
+        ],
+        "fieldControls": [
+          {
+            "name": "quotation_id",
+            "label": "Quitation ID",
+            "type": "text",
+            "placeHolder": "",
+            "class": "text-center",
+            "isReadOnly": true,
+            "isHidden": true,
+            "validators": []
+          },
+          {
+            "name": "line_nbr",
+            "label": "Thứ tự",
+            "type": "text",
+            "placeHolder": "",
+            "class": "text-center",
+            "style": "width: 60px",
+            "isReadOnly": true,
+            "validators": []
+          },
+          {
+            "name": "item_id",
+            "label": "Mã vật tư",
+            "type": "select",
+            "placeHolder": "Chọn vật tư",
+            "class": "text-center",
+            "isReadOnly": false,
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Mã VT là bắt buộc"
+              }
+            ],
+            "options": []
+          },
+          {
+            "name": "item_name",
+            "label": "Tên Vật tư",
+            "type": "text",
+            "placeHolder": "Tên sản phẩm",
+            "class": "text-center",
+            "validators": []
+          },
+          {
+            "name": "uom_id",
+            "label": "ĐVT",
+            "type": "text",
+            "placeHolder": "Đơn vị tính",
+            "class": "text-center",
+            "validators": []
+          },
+          {
+            "name": "quantity",
+            "label": "Số lượng",
+            "type": "number",
+            "placeHolder": "0",
+            "class": "text-end",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Số lượng là bắt buộc"
+              }
+            ]
+          },
+          {
+            "name": "price",
+            "label": "Đơn giá",
+            "type": "number",
+            "placeHolder": "0.00",
+            "class": "text-end",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Đơn giá là bắt buộc"
+              }
+            ]
+          },
+          {
+            "name": "amount",
+            "label": "Tiền trước thuế",
+            "type": "text",
+            "placeHolder": "0.00",
+            "class": "text-end",
+            "validators": []
+          },
+          {
+            "name": "tax_id",
+            "label": "Mã Thuế",
+            "type": "select",
+            "placeHolder": "VAT10",
+            "class": "text-center",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Mã thuế là bắt buộc"
+              }
+            ],
+            "options": []
+          },
+          {
+            "name": "vat",
+            "label": "Tiền Thuế",
+            "type": "text",
+            "placeHolder": "0.00",
+            "class": "text-end",
+            "validators": []
+          },
+          {
+            "name": "payment",
+            "label": "Tiền sau thuế",
+            "type": "text",
+            "placeHolder": "0.00",
+            "class": "text-end",
+            "validators": []
+          }
+        ],
+        "initialDatas": []
+      }
+    ],
+    "initialDatas": []
+  },
+  "file": {
+    "title": "Tệp đính kèm",
+    "type": "file-attachment"
+  },
+  "dataProcessing": {
+    "actions": {
+      "post": []
+    }
+  }
+}

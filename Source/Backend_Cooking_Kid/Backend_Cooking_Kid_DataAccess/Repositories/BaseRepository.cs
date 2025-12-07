@@ -4,23 +4,17 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Data;
+using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Backend_Cooking_Kid_DataAccess.Repositories
 {
     public interface IBaseRepository<T> where T : class
     {
         //Base
-        /// <summary>
-        /// Get all value of table
-        /// </summary>
-        /// <param name="tableName">table name</param>
-        /// <param name="page">page quantity</param>
-        /// <param name="pageSize">page size</param>
-        /// <returns>All value of table or value of page size</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="Exception"></exception>
         Task<List<dynamic>> GetAllAsync(string tableName, int? page, int? pageSize);
-        Task<List<dynamic>> GetAllAsync(string tableName, Dictionary<string, string>? pkValue, int? page, int? pageSize);
+        Task<List<dynamic>> GetAllByIdAsync(string tableName, Dictionary<string, object>? pkValue, int? page, int? pageSize);
+        Task<bool> UpdateAsync(string tableName, IEnumerable<Dictionary<string, object>> pkValues, IEnumerable<Dictionary<string, object>> initialDatasList);
         Task<dynamic?> GetByIdAsync(object id, string tableName, string? keyName = null);
         Task<int> UpsertAsync(DataTable table, ModelDefination sqlJsonDefination);
 
@@ -84,7 +78,7 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
             }
         }
 
-        public async Task<List<dynamic>> GetAllAsync(string tableName, Dictionary<string, string>? pkValue, int? page, int? pageSize)
+        public async Task<List<dynamic>> GetAllByIdAsync(string tableName, Dictionary<string, object>? pkValue, int? page, int? pageSize)
         {
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentNullException(nameof(tableName));
@@ -94,47 +88,51 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
             if (pageSize <= 0) pageSize = 100;
             try
             {
-                var connectionString = _context.Database.GetConnectionString(); // lấy từ EF Core
+                var connectionString = _context.Database.GetConnectionString();
                 using var conn = new SqlConnection(connectionString);
                 await conn.OpenAsync();
-                //lấy câu lệnh where
-                var conditions = new List<string>();
-                foreach (var pkVal in pkValue)
+
+                var parameters = new DynamicParameters();
+                var whereConditions = new List<string>();
+
+                foreach (var pk in pkValue)
                 {
-                    var condition = $"[{pkVal.Key}] = '{pkVal.Value}'";
-                    // Thêm điều kiện này vào danh sách
-                    conditions.Add(condition);
+                    string paramName = "@" + pk.Key;
+                    parameters.Add(paramName, pk.Value);
+                    whereConditions.Add($"[{pk.Key}] = {paramName}");
                 }
-                string whereClause = conditions.Count > 0 ? "WHERE " + string.Join(" AND ", conditions) : "";
+
+                string whereClause = whereConditions.Count > 0 ? "WHERE " + string.Join(" AND ", whereConditions) : "";
+
+                //string countSql = $"SELECT COUNT(*) FROM [{tableName}]{whereClause}";
+                //int totalCount = await conn.ExecuteScalarAsync<int>(countSql, parameters);
+
                 var sql = "";
-                // Lấy tổng số dòng
-                string countSql = $"SELECT COUNT(*) FROM [{tableName}]";
-                int totalCount = await conn.ExecuteScalarAsync<int>(countSql);
                 if (page != null && pageSize != null && page >= 0 && pageSize >= 0)
                 {
-                    // Lấy dữ liệu trang hiện tại
                     int offset = ((int)page - 1) * (int)pageSize;
                     sql = $@"
-								SELECT * 
-								FROM [{tableName}] 
-                                {whereClause}
-								ORDER BY (SELECT NULL) -- Tránh lỗi nếu không có cột cụ thể
-								OFFSET {offset} ROWS 
-								FETCH NEXT {pageSize} ROWS ONLY";
+                            SELECT *
+                            FROM [{tableName}]
+                            {whereClause}
+                            ORDER BY (SELECT NULL)
+                            OFFSET {offset} ROWS
+                            FETCH NEXT {pageSize} ROWS ONLY";
                 }
                 else
                 {
-                    sql = $"SELECT * FROM [{tableName}] {whereClause}";
+                    sql = $"SELECT * FROM [{tableName}]{whereClause}";
                 }
-                var items = await conn.QueryAsync(sql);
+
+                var items = await conn.QueryAsync(sql, parameters);
+
                 return items.ToList();
             }
             catch (Exception ex)
             {
-                throw new Exception($"Exception when fetching paged data from table '{tableName}'", ex);
+                throw new ExceptionFormat($"Get all by ID error: {ex.Message}");
             }
         }
-
 
         /// <summary>
         /// Get by id of table
@@ -190,6 +188,84 @@ namespace Backend_Cooking_Kid_DataAccess.Repositories
                 throw new ExceptionFormat("Dữ liệu id truyền vào không hợp lệ");
             }
         }
+
+        public async Task<bool> UpdateAsync(
+                                            string tableName,
+                                            // pkValues là danh sách các Dictionary, mỗi Dictionary là PK của một hàng
+                                            IEnumerable<Dictionary<string, object>> pkValues,
+                                            // initialDatasList là danh sách các Dictionary, mỗi Dictionary là dữ liệu cần cập nhật của một hàng
+                                            IEnumerable<Dictionary<string, object>> initialDatasList
+                                            )
+        {
+            // Đảm bảo số lượng PK và số lượng dữ liệu khớp nhau
+            if (pkValues.Count() != initialDatasList.Count())
+            {
+                throw new ArgumentException("The number of primary key sets must match the number of data sets.");
+            }
+
+            try
+            {
+                var connectionString = _context.Database.GetConnectionString();
+                using var conn = new SqlConnection(connectionString);
+                await conn.OpenAsync();
+
+                // Danh sách các tham số để Dapper thực thi theo lô
+                var batchParameters = new List<DynamicParameters>();
+
+                // Câu lệnh SQL (được xây dựng một lần)
+                string sql = "";
+
+                // Lặp qua từng bản ghi để xây dựng DynamicParameters
+                for (int i = 0; i < pkValues.Count(); i++)
+                {
+                    var pk = pkValues.ElementAt(i);
+                    var data = initialDatasList.ElementAt(i);
+
+                    var parameters = new DynamicParameters();
+                    var setClauses = new List<string>();
+                    var whereClauses = new List<string>();
+
+                    // Xây dựng SET clause
+                    foreach (var item in data)
+                    {
+                        // KHÔNG cần thêm ký tự @ vì Dapper xử lý DynamicParameters
+                        parameters.Add(item.Key, item.Value);
+                        setClauses.Add($"[{item.Key}] = @{item.Key}");
+                    }
+                    if (setClauses.Count == 0) continue; // Bỏ qua nếu không có gì để cập nhật
+                    string setClause = string.Join(", ", setClauses);
+
+                    foreach (var item in pk)
+                    {
+                        string pkParamName = $"{item.Key}";
+                        parameters.Add(pkParamName, item.Value);
+                        whereClauses.Add($"[{item.Key}] = @{pkParamName}");
+                    }
+                    if (whereClauses.Count == 0) throw new ExceptionFormat("Not have where clause for one record");
+                    string whereClause = " WHERE " + string.Join(" AND ", whereClauses);
+
+                    // Gán SQL chỉ trong lần lặp đầu tiên (cần đảm bảo cấu trúc cột giống nhau)
+                    if (string.IsNullOrEmpty(sql))
+                    {
+                        sql = $"UPDATE [{tableName}] SET {setClause}{whereClause}";
+                    }
+
+                    batchParameters.Add(parameters);
+                }
+
+                if (batchParameters.Count == 0) return true; // Không có gì để cập nhật
+
+                // 💡 Dapper tự động thực thi theo lô khi truyền List<DynamicParameters>
+                var rowsAffected = await conn.ExecuteAsync(sql, batchParameters);
+
+                return rowsAffected == batchParameters.Count; // Trả về true nếu tất cả các hàng đều được cập nhật
+            }
+            catch (Exception ex)
+            {
+                throw new ExceptionFormat(ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Update or insert data to db

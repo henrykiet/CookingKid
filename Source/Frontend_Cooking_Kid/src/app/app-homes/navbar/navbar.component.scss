@@ -1,5 +1,5 @@
 .navbar {
-  background: rgb(114, 172, 114);
+  background: rgb(53, 77, 53);
   transition: all 0.5s ease;
   height: 4rem;
   top: 0;
@@ -59,7 +59,7 @@
           position: absolute;
           top: 100%;
           right: 0;
-          color: rgba(255, 255, 255, 0.8);
+          color: rgba(165, 31, 31, 0.8);
           margin: 1rem 0 0 0;
           padding: 0.5rem 0.3rem;
           z-index: 999;
@@ -89,16 +89,16 @@
             border-radius: 2rem;
             background-color: transparent;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            color: rgba(165, 42, 42, 1);
+            color: rgb(255, 255, 255);
           }
         }
 
         &:not(.menu-open):hover {
-          color: rgba(165, 42, 42, 1);
+          color: rgb(165, 42, 42);
         }
 
         &.menu-open {
-          background: rgba(169, 169, 169, 0);
+          background: none;
         }
       }
     }

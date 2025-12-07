@@ -46,7 +46,7 @@
           </div>
           <a
             class="sidebar-nav-link"
-            [routerLink]="[children.routeLink]"
+            [routerLink]="[[children.routeLink] + '/' + [children.controller]]"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
           >

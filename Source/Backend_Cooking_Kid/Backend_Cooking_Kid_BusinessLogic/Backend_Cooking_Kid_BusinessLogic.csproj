@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\DataService.cs~RFbf4d732.TMP" />
+    <None Remove="Services\DataService.cs~RFf18c6b0.TMP" />
     <None Remove="Services\FileService.cs~RFbda3236.TMP" />
   </ItemGroup>
 

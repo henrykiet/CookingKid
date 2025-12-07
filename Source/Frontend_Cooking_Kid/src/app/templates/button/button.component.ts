@@ -13,12 +13,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       [type]="type"
       (click)="onClick.emit($event)"
     >
-      <i
-        *ngIf="icon"
-        [class]="icon + ' ' + classIcon"
-        [style]="styleIcon"
-        style="margin-right: 6px"
-      ></i>
+      <i *ngIf="icon" [class]="icon + ' ' + classIcon" [style]="styleIcon"></i>
       <span [class]="classSpan" [style]="styleSpan"> {{ label }}</span>
     </button>
   `,

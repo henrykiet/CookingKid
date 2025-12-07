@@ -33,6 +33,19 @@
         ]
       },
       {
+        "name": "controller",
+        "label": "Controller",
+        "type": "text",
+        "placeHolder": "Input controller",
+        "validators": [
+          {
+            "validatorName": "required",
+            "required": true,
+            "message": "*Controller is required"
+          }
+        ]
+      },
+      {
         "name": "label",
         "label": "Label",
         "type": "text",
@@ -133,6 +146,19 @@
             ]
           },
           {
+            "name": "controller",
+            "label": "Controller",
+            "type": "text",
+            "placeHolder": "Input controller",
+            "validators": [
+              {
+                "validatorName": "required",
+                "required": true,
+                "message": "*Controller is required"
+              }
+            ]
+          },
+          {
             "name": "label",
             "label": "Label",
             "type": "text",
@@ -163,8 +189,14 @@
             "label": "Status",
             "type": "select",
             "options": [
-              { "id": "A", "value": "Active" },
-              { "id": "I", "value": "Inactive" }
+              {
+                "id": "A",
+                "value": "Active"
+              },
+              {
+                "id": "I",
+                "value": "Inactive"
+              }
             ],
             "validators": [
               {

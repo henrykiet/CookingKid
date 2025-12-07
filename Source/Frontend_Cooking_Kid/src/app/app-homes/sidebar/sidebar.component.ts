@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IMetadataForm } from '../../models/dynamic.model';
 import { DynamicService } from '../../services/dynamic.service';
+import { HandleService } from '../../services/handle.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -45,30 +46,12 @@ export class SidebarComponent implements OnInit {
   previousExpandedItems: menuData[] = [];
   constructor(
     private dynamicService: DynamicService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private handleService: HandleService
   ) {}
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined') {
-      this.screenWidth = window.innerWidth;
-    }
-
-    // gọi hàm load menu cho sau này sử dụng
-    const sideDataString = localStorage.getItem('sideData');
-    // Kiểm tra nếu sideDataString có giá trị (không phải null)
-    if (sideDataString) {
-      try {
-        // Chỉ parse khi chắc chắn là string (sideDataString !== null)
-        this.sideData = JSON.parse(sideDataString);
-      } catch (e) {
-        console.error('Lỗi khi parse sideData từ localStorage:', e);
-        this.getMenus();
-        return;
-      }
-    }
-    if (!this.sideData) {
-      this.getMenus();
-    }
+    this.getMenus();
   }
 
   //call api get menus
@@ -76,7 +59,7 @@ export class SidebarComponent implements OnInit {
     this.metaform = new Object() as IMetadataForm;
     this.metaform.controller = 'menus';
     this.metaform.action = 'list';
-    this.dynamicService.handleMetadataForm(this.metaform).subscribe({
+    this.dynamicService.getMetadataForm(this.metaform).subscribe({
       next: (res) => {
         if (res) {
           this.metaform = res;
@@ -90,10 +73,11 @@ export class SidebarComponent implements OnInit {
                 childForm.initialDatas.forEach((subItem: any) => {
                   if (subItem.menu_id == item.menu_id) {
                     children.push({
-                      label: subItem.label,
-                      routeLink: subItem.routeLink,
-                      icon: subItem.icon,
+                      label: subItem.label ?? '',
+                      routeLink: subItem.routeLink ?? '',
+                      icon: subItem.icon ?? '',
                       expanded: subItem.expanded ?? false,
+                      controller: subItem.controller ?? '',
                     });
                   }
                 });
@@ -102,6 +86,7 @@ export class SidebarComponent implements OnInit {
               return {
                 label: item.label,
                 routeLink: item.routeLink,
+                controller: item.controller,
                 icon: item.icon,
                 expanded: item.expanded ?? false,
                 children: children.length > 0 ? children : undefined,
@@ -127,6 +112,14 @@ export class SidebarComponent implements OnInit {
       expanded: i.expanded ?? false,
       children: i.children ? this.loadMenu(i.children) : undefined,
     }));
+  }
+
+  //handle router link click
+  onRouterLinkClick(controller: string | undefined): void {
+    console.log('Router link clicked. Controller:', controller);
+    if (controller) {
+      this.handleService.setController(controller);
+    }
   }
 
   //click logo

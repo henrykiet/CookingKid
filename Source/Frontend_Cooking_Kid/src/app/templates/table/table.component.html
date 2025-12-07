@@ -1,14 +1,83 @@
-<div class="glass scroll-hidden" style="margin-top: 0.5rem">
+<div class="table-container" style="margin-top: 0.5rem">
   <div class="table-wrapper scroll-hidden">
-    <table #table class="table">
+    <table
+      #table
+      class="table"
+      (mousemove)="onMouseMove($event)"
+      (mouseup)="onMouseUp()"
+    >
       <thead>
         <tr>
-          <th>Action</th>
-          <th *ngFor="let head of thead">{{ head.label }}</th>
+          <th (mousedown)="onMouseDown($event, -1)">
+            <div class="header-content">Action</div>
+            <div class="resizer" [style.right.px]="-3"></div>
+          </th>
+          <th
+            *ngFor="let f of field; let i = index; let last = last"
+            [hidden]="f.isHidden"
+            (mousedown)="onMouseDown($event, i)"
+          >
+            <div class="header-content">{{ f.label }}</div>
+
+            <div class="resizer" [style.right.px]="-3" *ngIf="!last"></div>
+          </th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let row of tbody">
+      <ng-container [formGroup]="parentFormGroup" *ngIf="isDetail && formArray">
+        <tbody [formArrayName]="formArrayName!">
+          <ng-container
+            *ngIf="parentFormGroup.get(formArrayName!) as arrayControl"
+          >
+            <tr *ngFor="let row of data; let i = index" [formGroupName]="i">
+              <td>
+                <div class="td-action">
+                  <app-button
+                    variant="btn-icon"
+                    icon="fas fa-plus add-row-icon-inline"
+                    style="color: blue; padding-top: 0.25rem"
+                    styleIcon="font-size: 16px;"
+                    (onClick)="onAdd()"
+                  ></app-button>
+                  <app-button
+                    variant="btn-icon"
+                    icon="fas fa-trash"
+                    style="color: red; padding-top: 0.25rem"
+                    styleIcon="font-size: 16px;"
+                    (onClick)="onDelete(i)"
+                  ></app-button>
+                </div>
+              </td>
+              <ng-container *ngIf="formArray.at(i) as rowFormGroup">
+                <td *ngFor="let f of field" [hidden]="f.isHidden">
+                  <div class="flex flex-col items-start">
+                    <app-input
+                      [formControlName]="f.name"
+                      [placeHolder]="f.placeHolder"
+                      [isHidden]="f.isHidden"
+                      [isReadOnly]="f.isReadOnly"
+                      [style]="f.style"
+                      [classInput]="f.class"
+                      style="background-color: transparent; border: none"
+                    ></app-input>
+                    <small
+                      class="text-danger"
+                      *ngIf="
+                        rowFormGroup.get(f.name)?.invalid &&
+                        (rowFormGroup.get(f.name)?.touched || isFormSubmitted)
+                      "
+                      >{{
+                        getValidationErrors(f.name, f.validators, rowFormGroup)
+                      }}</small
+                    >
+                  </div>
+                </td>
+              </ng-container>
+            </tr>
+          </ng-container>
+        </tbody>
+      </ng-container>
+      <tbody *ngIf="!isDetail">
+        <tr *ngFor="let row of data">
           <td>
             <div class="td-action">
               <app-button
@@ -17,7 +86,7 @@
                 icon="fas fa-pen"
                 style="color: blue"
                 styleIcon="font-size: 16px"
-                (onClick)="onchangeUpdate(row)"
+                (onClick)="onUpdate(row)"
               ></app-button>
               <app-button
                 variant="btn-icon"
@@ -25,24 +94,26 @@
                 icon="fas fa-trash"
                 style="color: red"
                 styleIcon="font-size: 16px"
-                (onClick)="onchangeDelete(row)"
+                (onClick)="onDelete(row)"
               ></app-button>
             </div>
           </td>
-          <td *ngFor="let head of thead">{{ row[head.name] }}</td>
+          <td *ngFor="let f of field" [hidden]="f.isHidden">
+            {{ row[f.name] }}
+          </td>
         </tr>
       </tbody>
     </table>
-    <div class="pagination-wrapper">
-      <app-pagination
-        [classNav]="''"
-        [classUl]="''"
-        [styleNav]="'background: rgb(192, 241, 192);'"
-        [currentPage]="currentPage"
-        [totalPages]="totalPages"
-        (pageChange)="onPageChange($event)"
-      >
-      </app-pagination>
-    </div>
+  </div>
+  <div class="pagination-wrapper">
+    <app-pagination
+      [classNav]="''"
+      [classUl]="''"
+      [styleNav]="'background: rgb(192, 241, 192);'"
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChange)="onPageChange($event)"
+    >
+    </app-pagination>
   </div>
 </div>

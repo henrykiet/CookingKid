@@ -1,7 +1,7 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { IForm, IMetadataForm } from '../models/dynamic.model';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, throwError } from 'rxjs';
 import { lauching } from '../../../lauching.conf';
 import { APIResponse } from '../models/response-api.model';
 
@@ -14,31 +14,31 @@ export class DynamicService {
   private apiUrl = `${lauching.apiUrl}/api/data`;
   constructor(private http: HttpClient) {}
 
-  getMetadataForm(): Observable<IMetadataForm | null> {
-    return this.http
-      .get<APIResponse<IMetadataForm>>(`${this.apiUrl}/form`)
-      .pipe(
-        map((response) => {
-          if (response.success) {
-            localStorage.setItem(
-              'metadataConfig',
-              JSON.stringify(response.data)
-            );
-            localStorage.setItem(
-              'formConfig',
-              JSON.stringify(response.data.form)
-            );
-            this.metadataConfig = response.data;
-            this.formConfig = response.data.form ?? null;
-            return response.data;
-          } else {
-            return null;
-          }
-        })
-      );
-  }
+  // getMetadataForm(): Observable<IMetadataForm | null> {
+  //   return this.http
+  //     .get<APIResponse<IMetadataForm>>(`${this.apiUrl}/form`)
+  //     .pipe(
+  //       map((response) => {
+  //         if (response.success) {
+  //           localStorage.setItem(
+  //             'metadataConfig',
+  //             JSON.stringify(response.data)
+  //           );
+  //           localStorage.setItem(
+  //             'formConfig',
+  //             JSON.stringify(response.data.form)
+  //           );
+  //           this.metadataConfig = response.data;
+  //           this.formConfig = response.data.form ?? null;
+  //           return response.data;
+  //         } else {
+  //           return null;
+  //         }
+  //       })
+  //     );
+  // }
   //call api get form
-  handleMetadataForm(
+  getMetadataForm(
     metadataForm: IMetadataForm | null
   ): Observable<IMetadataForm | null> {
     return this.http
@@ -46,16 +46,6 @@ export class DynamicService {
       .pipe(
         map((response) => {
           if (response.success) {
-            // localStorage.setItem(
-            //   'metadataConfig',
-            //   JSON.stringify(response.data)
-            // );
-            // localStorage.setItem(
-            //   'formConfig',
-            //   JSON.stringify(response.data.form)
-            // );
-            // this.metadataConfig = response.data;
-            // this.formConfig = response.data.form ?? null;
             return response.data;
           } else {
             return null;
@@ -63,6 +53,25 @@ export class DynamicService {
         })
       );
   }
+
+  updateMetadataForm(
+    metadataForm: IMetadataForm | null
+  ): Observable<APIResponse<IMetadataForm> | null> {
+    if (!metadataForm) {
+      return throwError(() => new Error('Form data is missing.'));
+    }
+
+    // // TẠO ĐỐI TƯỢNG REQUEST MỚI để khớp với Cấu trúc C# (sử dụng PascalCase 'Form')
+    // const backendRequest = {
+    //   Form: form, // Gán đối tượng IForm vào thuộc tính 'Form'
+    // };
+
+    return this.http.put<APIResponse<IMetadataForm>>(
+      `${this.apiUrl}/form`,
+      metadataForm
+    );
+  }
+
   //#region old
   // getDynamicForm(config: IForm): IForm | null {
   //   if (isPlatformBrowser(this.platformId)) {

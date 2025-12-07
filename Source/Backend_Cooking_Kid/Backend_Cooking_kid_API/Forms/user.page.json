@@ -17,7 +17,7 @@
         "type": "text",
         "placeHolder": "Input user ID",
         "class": "",
-        "isReadOnly": null,
+        "isReadOnly": true,
         "isHidden": null,
         "validators": [
           {
@@ -39,6 +39,11 @@
             "validatorName": "required",
             "required": true,
             "message": "*First Name is required"
+          },
+          {
+            "validatorName": "minlength",
+            "minlength": 5,
+            "message": "*Minimum length should be 5"
           }
         ]
       },
@@ -56,8 +61,8 @@
           },
           {
             "validatorName": "minlength",
-            "minlength": 5,
-            "message": "*Minimum length should be 5"
+            "minlength": 2,
+            "message": "*Minimum length should be 2"
           }
         ]
       },

@@ -9,7 +9,7 @@
       label="Create"
       icon="fas fa-plus"
       styleIcon="font-size: 20px"
-      (onClick)="handleUpdate(undefined, 'insert')"
+      (onClick)="handlePopupForm(undefined, 'insert')"
     ></app-button>
     <!-- <app-button
       variant="btn-glass"
@@ -17,68 +17,11 @@
       icon="fas fa-minus"
     ></app-button> -->
   </app-action-box>
-  <!-- table -->
-  <!-- <table class="table table-striped table-bordered glass glass-table my-2">
-    <thead>
-      <tr>
-        <th
-          *ngFor="let field of metaform?.form?.fieldControls"
-          class="text-center"
-        >
-          <div>
-            {{ field.label }}
-          </div>
-        </th>
-        <th class="text-center">Action</th>
-      </tr>
-    </thead>
-    <tbody class="scroll-hidden">
-      <tr
-        *ngFor="let row of metaform?.form?.initialDatas; let rowIndex = index"
-      >
-        <td
-          *ngFor="let field of metaform?.form?.fieldControls"
-          class="text-center"
-        >
-          {{ row[field.name] }}
-        </td>
-        <td class="td-action">
-          <app-button
-            variant="btn-icon"
-            label="Update"
-            icon="fas fa-rotate"
-            style="color: blue"
-            (onClick)="handleUpdate(row)"
-          ></app-button>
-          <app-button
-            variant="btn-icon"
-            label="Delete"
-            icon="fas fa-trash"
-            style="color: red"
-            (onClick)="handleDelete()"
-          ></app-button>
-          <ng-container *ngIf="metaform?.form?.buttonControls">
-            <ng-container *ngFor="let button of metaform?.form?.buttonControls">
-              <app-button
-                variant="btn-icon"
-                [type]="button.type"
-                [style]="button.style"
-                (onClick)="(button.click)"
-                icon=""
-                [label]="button.label"
-                [class]="button.class"
-              >
-              </app-button>
-            </ng-container>
-          </ng-container>
-        </td>
-      </tr>
-    </tbody>
-  </table> -->
   <app-table
-    [tbody]="metaform?.form?.initialDatas"
-    [thead]="metaform?.form?.fieldControls"
-    (row)="handleUpdate($event, 'update')"
+    [data]="metaform?.form?.initialDatas"
+    [field]="metaform?.form?.fieldControls"
+    (row)="handlePopupForm($event, 'update')"
+    [isDetail]="false"
   >
   </app-table>
 </div>

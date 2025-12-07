@@ -1,21 +1,15 @@
-import { map } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input, OnInit } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DynamicService } from '../../services/dynamic.service';
 import { IMetadataForm } from '../../models/dynamic.model';
-import { Route, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from '../../templates/button/button.component';
 import { ActionBoxComponent } from '../../templates/boxs/action-box/action-box.component';
-import { PaginationComponent } from '../../templates/pagination/pagination.component';
 import { TableComponent } from '../../templates/table/table.component';
+import { ViewHelperService } from '../../helpers/view-helper';
+import { DataTransferService } from '../../services/data-transfer.service';
 
 @Component({
   selector: 'app-dynamic-grid',
@@ -29,26 +23,47 @@ import { TableComponent } from '../../templates/table/table.component';
     TableComponent,
   ],
   templateUrl: './dynamic-grid.component.html',
-  styleUrl: './dynamic-grid.component.scss',
 })
 export class DynamicGridComponent implements OnInit {
-  @Input({ required: true }) metaform: IMetadataForm | null = null;
   @Input() row: any = null;
+  action: string = 'list';
+  metaform: IMetadataForm | null = null;
+  currentController: string | null = null;
+  route = inject(ActivatedRoute);
   loading: boolean = false;
-  fb = inject(FormBuilder);
-  dynamicFormGroup: FormGroup = this.fb.group({}, { updateOn: 'submit' });
+  isPopup: boolean = false;
   constructor(private dynamicService: DynamicService, private router: Router) {}
   ngOnInit(): void {
-    this.getGridForm();
+    // Lắng nghe thay đổi tham số route để lấy controllerName -> grid
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const controllerName = params.get('controllerName');
+          if (controllerName) {
+            this.currentController = controllerName;
+            this.metaform = {
+              controller: controllerName,
+              action: this.action,
+            };
+            this.getGridForm();
+          } else {
+            this.metaform = null;
+          }
+          return [];
+        })
+      )
+      .subscribe();
   }
 
   getGridForm(): void {
     this.loading = true;
-    this.dynamicService.handleMetadataForm(this.metaform).subscribe({
+    this.dynamicService.getMetadataForm(this.metaform).subscribe({
       next: (res) => {
         if (res) {
           this.metaform = res;
-          localStorage.setItem('metadataConfig', JSON.stringify(this.metaform));
+          // if (this.metaform.form != null) {
+          //   this.viewHelper.FilterFieldControl(this.metaform.form, this.action);
+          // }
         } else {
           console.error('No form configuration found');
         }
@@ -62,9 +77,9 @@ export class DynamicGridComponent implements OnInit {
   }
 
   handleDelete() {}
-  handleUpdate(row: any, action: string): void {
+  handlePopupForm(row: any, action: string): void {
     if (this.metaform != null && this.metaform.form != null) {
-      this.metaform!.action = action;
+      // this.metaform!.action = action;
       // Build giá trị PK từ danh sách primarykey
       const pkValue: { [key: string]: string | null } = {};
       const normalizedRow: { [key: string]: any } = {};
@@ -75,33 +90,28 @@ export class DynamicGridComponent implements OnInit {
       }
       // Khóa chính trong metadata là 'primaryKey'
       this.metaform.form.primaryKey?.forEach((key) => {
-        // 2. SỬ DỤNG KEY (Vốn đã là chữ thường) ĐỂ TRA CỨU TRONG normalizedRow
+        // SỬ DỤNG KEY  ĐỂ TRA CỨU TRONG normalizedRow
         const normalizedKey = key.toLowerCase();
-
         pkValue[key] =
           normalizedRow[normalizedKey] !== undefined &&
           normalizedRow[normalizedKey] !== null
             ? String(normalizedRow[normalizedKey])
             : null;
       });
-      this.metaform.pkValue = pkValue;
-      // call api get update form
-      this.dynamicService.handleMetadataForm(this.metaform).subscribe({
-        next: (res) => {
-          if (res && res.form) {
-            // Gán vào form
-            this.metaform!.form = res.form;
-            console.log('metaform form for update:', this.metaform);
-            localStorage.setItem(
-              'metadataConfig',
-              JSON.stringify(this.metaform)
-            );
-            this.router.navigate([`${this.router.url}/popup`]);
-          }
-        },
-      });
+      // this.metaform.pkValue = pkValue;
+      const metadataConfig: IMetadataForm = {
+        controller: this.metaform.controller,
+        action: action,
+        partition: this.metaform.partition,
+        isPartition: this.metaform.isPartition,
+        pkValue: pkValue,
+      };
+      localStorage.setItem('metadataConfig', JSON.stringify(metadataConfig));
+      //chuyển hướng đến popup
+      // this.router.navigate(['popup'], { relativeTo: this.route });
+      this.router.navigate(['/popup', this.currentController]);
     } else {
-      //hiển thị không chuyển trang đucojw do thiếu dữ liệu
+      console.error('Metadata form or form configuration is null');
     }
   }
 }

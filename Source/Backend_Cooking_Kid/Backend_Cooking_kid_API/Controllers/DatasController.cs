@@ -17,10 +17,27 @@ namespace Backend_Cooking_kid_API.Controllers
 
 
         [HttpPost("form")]
-        public async Task<IActionResult> FormMetadata([FromBody] MetadataRequest response)
+        public async Task<IActionResult> FormMetadata([FromBody] MetadataRequest request)
         {
-            var result = await _dataService.GetFormMetadataAsync(response);
+            var result = await _dataService.GetFormMetadataAsync(request);
             return Ok(result);
+        }
+
+        [HttpPut("form")]
+        public async Task<IActionResult> UpdateFormMetadata([FromBody] UpdateMetadataRequest request)
+        {
+            var result = await _dataService.UpdateFormMetadataAsync(request);
+
+            if (result.Success)
+            {
+
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+
+            }
         }
     }
 }

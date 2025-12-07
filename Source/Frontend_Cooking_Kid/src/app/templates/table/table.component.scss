@@ -1,50 +1,72 @@
 table {
-  // border: 1px solid black;
   min-width: max-content;
-  border-radius: 1rem;
   margin: 0;
-  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
 }
-thead {
-  background: rgb(192, 241, 192);
-  position: sticky;
-  top: 0px;
+.table-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 700px; /* Tổng chiều cao cho bảng + pagination */
+  border: 1px solid black;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
-.pagination-wrapper {
-  /* Đảm bảo pagination-wrapper có cùng chiều rộng cuộn với bảng */
+.table-wrapper {
+  flex-grow: 1;
+  min-height: 0;
+  border-radius: 1rem 1rem 0 0;
+  margin-right: 10rem;
+
   width: 100%;
-  position: sticky;
-  bottom: 0; /* Dính vào đáy của .table-wrapper */
-  z-index: 10; /* Đảm bảo nó nằm trên thead khi cuộn */
+  background: rgba(248, 250, 248, 0.829);
+}
+.pagination-wrapper {
+  border-top: 1px solid black;
+  width: 100%;
 }
 
 app-pagination {
   border-radius: 0 0 1rem 1rem;
-  bottom: 0;
+  width: 100%;
+}
+
+thead {
+  background: rgb(192, 241, 192);
+  position: sticky;
+  top: 0px;
   width: 100%;
 }
 
 th,
 td {
   border: 1px solid rgba(117, 88, 88, 0.4);
-  padding: 10px;
-  border-collapse: separate;
-  border-spacing: 0;
   text-align: center;
   background: transparent;
 }
 
-.td-action {
-  display: flex; /* Sử dụng flexbox cho nội dung */
-  gap: 0.5rem;
-  justify-content: center; /* Căn giữa các nút bên trong <td> */
-  align-items: center;
+th {
+  border-bottom: 1px solid black;
+  position: relative;
 }
 
-.table-wrapper {
-  max-height: 500px;
-  border-radius: 1rem;
-  min-width: max-content;
-  background: rgba(248, 250, 248, 0.829);
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px; /* Chiều rộng để dễ click */
+  height: 100%;
+  cursor: col-resize; /* Đổi con trỏ chuột thành dấu kéo */
+  z-index: 1;
+  /* Optional: Thêm border-right mờ để nó hiển thị rõ hơn */
+  /* border-right: 1px solid rgba(0, 0, 0, 0.2); */
+}
+
+.td-action {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; //đc xuống dòng
 }

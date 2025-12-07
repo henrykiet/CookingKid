@@ -1,10 +1,11 @@
 export interface IMetadataForm {
   controller?: string;
   action?: string;
-  vCId?: string;
-  vCDate?: string;
+  partition?: string;
+  isPartition?: boolean;
   form?: IForm;
   pkValue?: { [key: string]: string | null };
+  initialDatas?: any;
 }
 
 export interface IForm {
@@ -14,7 +15,7 @@ export interface IForm {
   style?: string;
   tableName?: string;
   primaryKey?: string[];
-  primarykeyvalue?: { [key: string]: string | null };
+  primarykeyValue?: { [key: string]: string | null };
   buttonControls: IButtonControl[];
   fieldControls: IFieldControl[];
   detailForms: IForm[];
@@ -38,6 +39,7 @@ export interface IFieldControl {
   label: string;
   value: string;
   placeHolder: string;
+  isView?: string[];
   class?: string;
   style?: string;
   type: string;

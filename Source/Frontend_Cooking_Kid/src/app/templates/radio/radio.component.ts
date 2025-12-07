@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, forwardRef, Input, OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { IOption } from '../../models/dynamic.model';
 
 @Component({
   selector: 'app-radio',
@@ -9,18 +8,20 @@ import { IOption } from '../../models/dynamic.model';
   template: `
     <div>
       <label [class]="classLabel">{{ label }}</label>
-      <div *ngFor="let option of options" class="form-check">
+      <div *ngFor="let option of options; let i = index" class="form-check">
         <input
           class="form-check-input"
           type="radio"
           [name]="nameRadio"
-          [value]="option"
-          [checked]="value === option"
-          [id]="for"
-          (change)="onChange(option)"
+          [value]="getRadioKey(option)"
+          [checked]="value === getRadioKey(option)"
+          [id]="nameRadio + i"
+          (change)="onChange(getRadioKey(option))"
           (blur)="onTouched()"
         />
-        <label class="form-check-label" [for]="for">{{ option }}</label>
+        <label class="form-check-label" [for]="nameRadio + i">{{
+          option
+        }}</label>
       </div>
     </div>
   `,
@@ -39,14 +40,17 @@ export class RadioComponent {
   @Input() classLabel? = '';
   @Input() nameRadio = 'radio';
   @Input() options?: string[] = [];
-
   value: any;
-  onChange = (_: any) => {};
+  writeValue(val: string): void {
+    this.value = val.charAt(0).toUpperCase();
+  }
+  onChange = (key: string) => {};
+  getRadioKey(label: string): string {
+    return label.charAt(0).toLocaleUpperCase();
+  }
+
   onTouched = () => {};
 
-  writeValue(val: any): void {
-    this.value = val;
-  }
   registerOnChange(fn: any): void {
     this.onChange = fn;
   }
